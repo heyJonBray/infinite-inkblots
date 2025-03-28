@@ -9,8 +9,8 @@ const crypto = require('crypto');
 // Configuration parameters
 const params = {
   size: 800, // Canvas size
-  particleCount: 100, // Particles per frame
-  framesToRender: 120, // Number of frames to simulate
+  particleCount: 50, // Particles per frame
+  framesToRender: 100, // Number of frames to simulate
   speed: 0.005, // Animation speed
   scale: 0.008, // Noise scale
   maxRadius: 8, // Maximum particle radius
@@ -303,9 +303,37 @@ function createSymmetricalParticle(seededRandom, size) {
   const usableWidth = size * (1 - 2 * params.horizontalMargin);
   const usableHeight = size * (1 - 2 * params.verticalMargin);
 
-  // Generate a point in the left half of the usable area, then adjust for margin
-  const x = seededRandom() * (usableWidth / 2) + size * params.horizontalMargin;
-  const y = seededRandom() * usableHeight + size * params.verticalMargin;
+  // Keep trying until we get a valid particle
+  let attempts = 0;
+  let x, y;
+
+  do {
+    // Generate a point in the left half of the usable area, then adjust for margin
+    x = seededRandom() * (usableWidth / 2) + size * params.horizontalMargin;
+    y = seededRandom() * usableHeight + size * params.verticalMargin;
+
+    // Calculate distance from center as a normalized value (0 to 1)
+    const centerX = size / 2;
+    const centerY = size / 2;
+
+    // Normalized distance from center (0 = center, 1 = furthest corner)
+    const dx = (x - centerX) / (size / 2);
+    const dy = (y - centerY) / (size / 2);
+
+    // Distance from center (0 to 1)
+    const distFromCenter = Math.sqrt(dx * dx + dy * dy);
+
+    // Acceptance probability: higher near center, lower near edges
+    // Adjust the exponent (3) to control how quickly probability drops off
+    const acceptanceProbability = Math.pow(1 - distFromCenter, 3);
+
+    // Accept the particle based on its distance from center
+    if (seededRandom() < acceptanceProbability || attempts > 10) {
+      break;
+    }
+
+    attempts++;
+  } while (attempts <= 10); // Give up after 10 attempts to avoid infinite loops
 
   // Create the mirrored point for perfect bilateral symmetry
   const mirrorX = size - x;
@@ -416,6 +444,11 @@ function generateParticleRorschach(ethAddress, customParams = {}) {
         currentParams.maxRadius
       );
 
+      // Vary radius based on distance from center to create more organic edges
+      // Particles further from center get smaller
+      const sizeVariation = 1 - distanceFromCenter * 0.7;
+      const organicRadius = plotter.radius * sizeVariation;
+
       // Draw both particles with the same color and radius
       ctx.fillStyle = plotter.color;
 
@@ -424,7 +457,7 @@ function generateParticleRorschach(ethAddress, customParams = {}) {
       ctx.arc(
         particles.original.x,
         particles.original.y,
-        plotter.radius,
+        organicRadius,
         0,
         2 * Math.PI
       );
@@ -435,7 +468,7 @@ function generateParticleRorschach(ethAddress, customParams = {}) {
       ctx.arc(
         particles.mirrored.x,
         particles.mirrored.y,
-        plotter.radius,
+        organicRadius,
         0,
         2 * Math.PI
       );
@@ -492,10 +525,10 @@ function main() {
   }
 
   // Generate output filename
-  const outputFilename = args.ethAddress
-    ? `particle_ror_${args.ethAddress.slice(0, 10)}.png`
-    : `particle_ror_${Date.now()}.png`;
-
+  // const outputFilename = args.ethAddress
+  //   ? `particle_ror_${args.ethAddress.slice(0, 10)}.png`
+  //   : `particle_ror_${Date.now()}.png`;
+  const outputFilename = `test.png`;
   const outputPath = `${args.outputPath}/${outputFilename}`;
 
   console.log(`Generating particle-based Rorschach inkblot...`);
