@@ -1,7 +1,7 @@
 // Examples script for Infinite Inkblots
 // Generates multiple examples from different Ethereum addresses
 
-const { EthereumRorschachGenerator } = require('./eth_rorschach');
+const { EthereumRorschachGenerator } = require('./rorschach');
 const fs = require('fs');
 
 // Sample Ethereum addresses for testing

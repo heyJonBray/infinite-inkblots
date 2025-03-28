@@ -1,0 +1,19 @@
+{
+  "name": "Infinite Inkblot 0x5B38Da6a",
+  "description": "A unique Rorschach-style inkblot generated from an Ethereum address",
+  "image": "particle_ror_0x5B38Da6a701c568545dCfcB03FcB875f56beddC4.png",
+  "attributes": [
+    {
+      "trait_type": "ColorScheme",
+      "value": "Classic"
+    },
+    {
+      "trait_type": "Complexity",
+      "value": "Medium"
+    },
+    {
+      "trait_type": "ParticleCount",
+      "value": 120000
+    }
+  ]
+}
