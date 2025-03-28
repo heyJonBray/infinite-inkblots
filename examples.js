@@ -27,7 +27,7 @@ const config = {
 
 // Create output directories
 const OUTPUT_DIR = 'out/examples';
-const METADATA_DIR = 'out/examples/metadata';
+const METADATA_DIR = 'out/metadata';
 
 if (!fs.existsSync(OUTPUT_DIR)) {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -60,7 +60,7 @@ async function generateExamples() {
     const traits = generator.generate();
 
     // Save metadata
-    const metadataPath = `${METADATA_DIR}/metadata_${i + 1}_${address.substring(
+    const metadataPath = `${METADATA_DIR}/metadata_${address.substring(
       0,
       8
     )}.json`;

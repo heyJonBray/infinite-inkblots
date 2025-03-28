@@ -98,27 +98,25 @@ Always verify these aspects when making changes:
 
 ## NFT Integration Guidelines
 
-### Metadata Format
+### Metadata Format and Storage
 
-Follow this JSON structure for NFT marketplaces:
+The generator creates metadata in a standard NFT format and saves to `out/metadata/`:
 
 ```json
 {
-  "name": "Infinite Inkblot #123",
+  "name": "Infinite Inkblot 0x5B38Da6a",
   "description": "A unique Rorschach-style inkblot generated from an Ethereum address",
-  "image": "particle_ror_0x1234.png",
+  "image": "particle_ror_0x5B38Da6a701c568545dCfcB03FcB875f56beddC4.png",
   "attributes": [
     {
-      "trait_type": "Color Scheme",
+      "trait_type": "ColorScheme",
       "value": "Blues"
-    },
-    {
-      "trait_type": "Particle Density",
-      "value": "Medium"
     }
   ]
 }
 ```
+
+This format is compatible with most NFT marketplaces and standards.
 
 ### Image Storage
 

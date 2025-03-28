@@ -70,7 +70,7 @@ class EthereumRorschachGenerator {
   // Extract features from Ethereum address
   extractEthFeatures() {
     if (!this.ethAddress || typeof this.ethAddress !== 'string') {
-      return Math.floor(Math.random() * 10000);
+      return null;
     }
 
     const normalizedAddress = this.ethAddress.toLowerCase().replace('0x', '');
@@ -118,6 +118,8 @@ class EthereumRorschachGenerator {
 
   // Select a color scheme based on ETH features
   selectColorScheme(features) {
+    if (!features) return 'default';
+
     if (features.highCharRatio > 0.6) {
       return 'blues';
     } else if (features.evenCharRatio > 0.6) {
@@ -152,6 +154,11 @@ class EthereumRorschachGenerator {
     const u = this.fade(x);
     const v = this.fade(y);
     const w = this.fade(z);
+
+    // Initialize perm table if not already done
+    if (!this.perm) {
+      this.initPermTable();
+    }
 
     // Use seed to generate consistent but random-looking values
     const A = (this.perm[X & 255] + Y) & 255;
@@ -459,6 +466,9 @@ class EthereumRorschachGenerator {
   }
 }
 
+// Export the class for use in other files
+module.exports = { EthereumRorschachGenerator };
+
 // Example usage
 function main() {
   const args = processArguments();
@@ -484,11 +494,20 @@ function main() {
 
   // Save metadata if requested
   if (args.saveMetadata) {
-    const metadataPath = args.outputPath.replace('.png', '.json');
+    // Create metadata directory if it doesn't exist
+    const metadataDir = 'out/metadata';
+    if (!fs.existsSync(metadataDir)) {
+      fs.mkdirSync(metadataDir, { recursive: true });
+    }
+
+    // Create metadata filename
+    const addressPart = args.ethAddress
+      ? args.ethAddress.substring(0, 8)
+      : 'random';
+    const metadataPath = `${metadataDir}/metadata_${addressPart}.json`;
+
     const metadata = {
-      name: `Infinite Inkblot ${
-        args.ethAddress ? args.ethAddress.substring(0, 8) : 'Random'
-      }`,
+      name: `Infinite Inkblot ${addressPart}`,
       description:
         'A unique Rorschach-style inkblot generated from an Ethereum address',
       image: args.outputPath.split('/').pop(),
@@ -526,5 +545,7 @@ function processArguments() {
   return args;
 }
 
-// Run the program
-main();
+// Run the program if called directly
+if (require.main === module) {
+  main();
+}

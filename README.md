@@ -47,6 +47,8 @@ node eth_rorschach.js \
   --saveMetadata
 ```
 
+When using `--saveMetadata`, the metadata JSON will be saved to `out/metadata/` directory.
+
 ### Parameters
 
 - `--ethAddress`: Ethereum address for deterministic generation
@@ -85,15 +87,15 @@ Different Ethereum addresses produce distinctly different inkblots:
 - Addresses with high character diversity: Produces more complex, detailed patterns
 - Specific character distributions: Influences color and density distributions
 
-## NFT Integration
+### NFT Integration
 
-The generator automatically extracts traits for NFT metadata:
+The generator automatically extracts traits for NFT metadata and saves them to `out/metadata/`:
 
 ```json
 {
-  "name": "Infinite Inkblot #123",
+  "name": "Infinite Inkblot 0x5B38Da6a",
   "description": "A unique Rorschach-style inkblot generated from an Ethereum address",
-  "image": "particle_ror_0x1234.png",
+  "image": "particle_ror_0x5B38Da6a701c568545dCfcB03FcB875f56beddC4.png",
   "attributes": [
     {
       "trait_type": "ColorScheme",
@@ -113,7 +115,6 @@ The generator automatically extracts traits for NFT metadata:
     }
   ]
 }
-```
 
 ## License
 
@@ -123,3 +124,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - Particle distribution approach inspired by Nicolas Decoster's P5.js implementation
 - Built on the rich tradition of generative art and NFT collections
+```
