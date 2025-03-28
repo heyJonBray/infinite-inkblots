@@ -2,15 +2,33 @@ import numpy as np
 import random
 from PIL import Image, ImageDraw, ImageFilter, ImageOps
 import math
+import hashlib
 
-def create_realistic_rorschach(size=1024, seed=None):
+def create_realistic_rorschach(size=1024, eth_address=None):
     """
     Create a realistic Rorschach inkblot test image with organic flowing shapes
     and natural-looking fractal extensions.
+    
+    Parameters:
+        size (int): Size of the output image in pixels (square)
+        eth_address (str): Ethereum address to use as seed. If None, random seed is used.
     """
-    if seed is not None:
+    if eth_address is not None:
+        # Convert Ethereum address to a numerical seed
+        # First, normalize the address (remove '0x' if present, convert to lowercase)
+        eth_address = eth_address.lower().replace('0x', '')
+        
+        # Create a hash of the address to get a deterministic number
+        hash_object = hashlib.sha256(eth_address.encode())
+        hex_digest = hash_object.hexdigest()
+        
+        # Convert the first 8 bytes of the hash to an integer
+        seed = int(hex_digest[:16], 16)
+        np_seed = seed % (2**32)
+        
+        # Set the seeds for both random and numpy.random
         random.seed(seed)
-        np.random.seed(seed)
+        np.random.seed(np_seed)
     
     # Create canvas with white background
     img = Image.new('RGBA', (size, size), (255, 255, 255, 255))
@@ -21,7 +39,7 @@ def create_realistic_rorschach(size=1024, seed=None):
     # Step 2: Add texture and details
     textured_shape = add_ink_texture(base_shape)
     
-    # Step 3: Mirror to create the symmetry characteristic of Rorschach images
+    # Step 3: Mirror to create the vertical symmetry characteristic of Rorschach images
     half_width = size // 2
     left_half = textured_shape.crop((0, 0, half_width, size))
     right_half = ImageOps.mirror(left_half)
@@ -30,8 +48,31 @@ def create_realistic_rorschach(size=1024, seed=None):
     img.paste(left_half, (0, 0), left_half)
     img.paste(right_half, (half_width, 0), right_half)
     
+    # Step 4: Mirror the image horizontally to create a four-quadrant image
+    top_half = img.crop((0, 0, size, size // 2))
+    bottom_half = ImageOps.flip(top_half)
+    
+    # Create a new image for the four-quadrant result
+    four_quadrant_img = Image.new('RGBA', (size, size), (255, 255, 255, 255))
+    four_quadrant_img.paste(top_half, (0, 0), top_half)
+    four_quadrant_img.paste(bottom_half, (0, size // 2), bottom_half)
+    
+    # Step 5: Reduce the size of the horizontal mirror by 25%
+    resized_img = Image.new('RGBA', (size, size), (255, 255, 255, 255))
+    
+    # Calculate new size (75% of original)
+    new_size = (int(size * 0.75), int(size * 0.75))
+    resized_four_quadrant = four_quadrant_img.resize(new_size, Image.Resampling.LANCZOS)
+    
+    # Calculate position to center the resized image
+    x_offset = (size - new_size[0]) // 2
+    y_offset = (size - new_size[1]) // 2
+    
+    # Paste the resized image onto the final canvas
+    resized_img.paste(resized_four_quadrant, (x_offset, y_offset), resized_four_quadrant)
+    
     # Return the final image
-    return img.convert('RGB')
+    return resized_img.convert('RGB')
 
 def generate_interconnected_shapes(size):
     """
@@ -621,5 +662,11 @@ def add_ink_texture(img):
 
 # Generate and save the image
 if __name__ == "__main__":
-    inkblot = create_realistic_rorschach(size=1024, seed=4)
-    inkblot.save("realistic_rorschach.png")
+    # Example usage with an Ethereum address
+    eth_address = "0xshmooshmoo0000000000000"
+    inkblot = create_realistic_rorschach(size=1024, eth_address=eth_address)
+    inkblot.save("eth_rorschach.png")
+    
+    # You can also generate a random inkblot by not providing an ethereum address
+    # random_inkblot = create_realistic_rorschach(size=1024)
+    # random_inkblot.save("random_rorschach.png")
