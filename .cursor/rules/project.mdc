@@ -1,0 +1,178 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Infinite Inkblots - Project Guide
+
+This document provides guidance and best practices for working with the Infinite Inkblots codebase. This project generates unique, deterministic Rorschach-style inkblot images based on Ethereum addresses for use as NFTs.
+
+## Project Overview
+
+Infinite Inkblots creates generative art NFTs where each Ethereum address produces a unique, deterministic inkblot. The system combines Perlin noise algorithms with organic edge details and leverages properties of the Ethereum address to influence the visual characteristics of each inkblot.
+
+## File Structure and Responsibilities
+
+- **rorschach/inkblot.py**: Main generation logic responsible for creating inkblots. Contains the core `create_inkblot` function.
+  - Handles parameters and configuration
+  - Manages the complete generation pipeline
+  - Contains detail generation functions (drips, tendrils, spots)
+  - Centers and scales final images
+
+- **rorschach/perlin.py**: Perlin noise implementation that forms the foundation of the inkblots.
+  - Responsible for the organic base patterns
+  - Contains optimizations for visual quality
+  - Handles noise parameters (scale, octaves, persistence, lacunarity)
+
+- **rorschach/eth_utils.py**: Ethereum address processing utilities.
+  - Extracts features from Ethereum addresses
+  - Maps address features to visual parameters
+  - Determines color schemes and visual characteristics
+  - Ensures deterministic output for each address
+
+- **rorschach/example.py**: Command-line interface implementation.
+  - Provides the `generate-inkblot` command
+  - Handles user parameters and output configuration
+
+- **eth_demo.py**: Demo script for generating multiple examples from different addresses.
+  - Useful for testing and visualization
+
+- **setup.py**: Package installation and configuration.
+  - Defines entry points and dependencies
+
+## Best Practices for Maintaining Modularity
+
+1. **Preserve Function Interfaces**:
+   - Maintain the signature of `create_inkblot()` to ensure backward compatibility
+   - Add new parameters with default values instead of changing existing ones
+   - Use keyword arguments for clarity
+
+2. **Keep Concerns Separated**:
+   - Perlin noise generation should remain isolated in perlin.py
+   - Ethereum utilities should remain in eth_utils.py
+   - Visual effects and details should remain in inkblot.py
+
+3. **Parameter Modifications**:
+   - When adding new parameters, update them in:
+     - Function definitions
+     - Command-line interface
+     - Documentation
+     - Demo scripts
+
+4. **Extend, Don't Modify**:
+   - Extend existing functionality through new helper functions
+   - Avoid modifying core algorithms unless necessary
+   - Use composition over inheritance
+
+## Working with Ethereum Address Features
+
+1. **Address Feature Extraction**:
+   - The `extract_eth_features()` function extracts key features from addresses
+   - Add new feature extractions in eth_utils.py when needed
+   - Ensure deterministic results (same address = same features)
+
+2. **Parameter Mapping**:
+   - `apply_eth_features_to_noise()` maps address features to visual parameters
+   - Function returns a parameters dictionary that should be respected
+   - Add new mappings for new visual effects as needed
+
+3. **Color Schemes**:
+   - `get_eth_color_scheme()` determines color parameters from address features
+   - Currently focused on grayscale values
+   - Can be extended for colored variants while preserving the API
+
+4. **Determinism Requirements**:
+   - All random operations must be seeded with the ETH address-derived seed
+   - Results must be reproducible for the same address
+   - Avoid non-deterministic APIs or operations
+
+## NFT Integration Guidelines
+
+1. **Metadata Extraction**:
+   - Add metadata extraction functions that derive NFT attributes from the image and address
+   - Consider extracting features like:
+     - Pattern complexity
+     - Edge detail prevalence
+     - Distribution of ink vs. whitespace
+     - Dominant shapes or patterns
+
+2. **Metadata Standards**:
+   - Follow ERC-721 or ERC-1155 metadata standards
+   - Include both visual traits and address-derived traits
+   - Use a consistent schema across all generated tokens
+
+3. **Image Output**:
+   - Maintain high resolution (800x800 or higher) for quality NFTs
+   - Support transparent backgrounds (PNG format)
+   - Consider output variants (with/without frames, different color schemes)
+
+4. **Provenance**:
+   - Implement functions to verify an image was generated from a specific address
+   - Consider adding subtle address encoding in the image itself
+
+## Performance Considerations
+
+1. **Generation Efficiency**:
+   - Optimize computational tasks for large-scale generation
+   - Consider caching frequently used results
+   - Profile slow operations and optimize when generating many tokens
+
+2. **Edge Detail Optimization**:
+   - The `detail_intensity` parameter controls computation cost
+   - Be mindful of performance when increasing detail levels
+   - Use sampling techniques for edge points rather than processing all edges
+
+3. **Scaling Strategies**:
+   - Implement batch processing for multiple address generation
+   - Consider parallelization for large collections
+
+## Extension Guidelines
+
+1. **New Visual Effects**:
+   - Add new detail types in the inkblot.py file
+   - Follow existing patterns for drips, tendrils, and spots
+   - Map ETH address features to control new effects
+
+2. **Animation Support**:
+   - Consider animated variants that evolve the inkblot
+   - Ensure deterministic animation based on the address
+
+3. **Interactive Elements**:
+   - For interactive NFTs, maintain the core deterministic algorithm
+   - Allow interaction to reveal additional details or variations
+
+4. **Color Variants**:
+   - When implementing color, preserve grayscale as the default
+   - Map ETH address features to color schemes
+   - Consider colorblind-friendly palettes
+
+## Testing Requirements
+
+1. **Determinism Testing**:
+   - Verify that the same address always produces the same result
+   - Test across different environments and machines
+
+2. **Parameter Validation**:
+   - Test boundary conditions for all parameters
+   - Ensure reasonable defaults for all configurable options
+
+3. **Visual Regression Testing**:
+   - Implement tests that compare generated images against references
+   - Flag unexpected visual changes when modifying algorithms
+
+## Important Context for AI Development
+
+1. **This is an NFT project** - output quality, uniqueness, and determinism are critical
+2. **Metadata extraction is essential** for NFT marketplace integration
+3. **Address-driven generation** must be maintained in all modifications
+4. **Visual quality takes precedence** over performance in most scenarios
+5. **Consider collector experience** when making visual modifications
+6. **Maintain a reasonable whitespace margin** to give inkblots a framed artwork appearance
+7. **Balance uniqueness with aesthetic appeal** - not all random variations are desirable
+
+## Versioning and Updates
+
+When implementing significant changes:
+1. Update version number in setup.py
+2. Document changes in README.md
+3. Provide upgrade paths that preserve deterministic output for existing addresses
