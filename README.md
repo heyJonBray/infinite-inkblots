@@ -1,21 +1,21 @@
-# Rorschach Inkblot Generator
+# Noise-Based Rorschach Generator
 
-This package generates realistic Rorschach-style inkblot test images with organic flowing shapes and natural-looking fractal extensions. The generator creates symmetrical inkblots that can be seeded with Ethereum addresses for deterministic generation.
+This package generates beautiful Rorschach-style inkblot images using Perlin noise. The generator creates symmetrical inkblots with gradients and color transitions inspired by traditional ink on paper.
 
 ## Features
 
-- Realistic inkblot generation with organic shapes
-- Natural-looking ink effects (drips, spots, textures)
-- Fractal-like tendrils and extensions
-- Symmetrical design (both vertical and horizontal)
-- Deterministic generation using Ethereum addresses as seeds
+- Perlin noise-based inkblot generation
+- Beautiful color gradients (dark blue/purple to cream)
+- Perfect symmetry with organic forms
+- Control over noise scale and pattern detail
+- Deterministic generation using seeds
 
 ## Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/heyjonbray/infinite-inkblots.git
-cd infinite-inkblots
+git clone https://github.com/yourusername/noise-rorschach.git
+cd noise-rorschach
 
 # Install the package
 pip install -e .
@@ -32,39 +32,42 @@ After installation, you can use the included command line tool:
 generate-rorschach --output my_inkblot.png
 
 # Generate an inkblot with a specific size
-generate-rorschach --size 2048 --output large_inkblot.png
+generate-rorschach --size 1024 --output large_inkblot.png
 
-# Generate an inkblot with a specific Ethereum address as seed
-generate-rorschach --address 0x123456789abcdef --output eth_inkblot.png
+# Generate an inkblot with a specific noise scale
+generate-rorschach --noise-scale 0.005 --output detailed_inkblot.png
+
+# Generate a reproducible inkblot with a specific seed
+generate-rorschach --seed 42 --output seeded_inkblot.png
 ```
 
 ### As a Python Package
 
 ```python
-from rorschach import create_realistic_rorschach
+from noise_rorschach import create_noise_rorschach
 
 # Generate a random inkblot
-inkblot = create_realistic_rorschach(size=1024)
+inkblot = create_noise_rorschach(size=800)
 inkblot.save("random_inkblot.png")
 
-# Generate an inkblot with a specific Ethereum address as seed
-eth_address = "0x123456789abcdef"
-seeded_inkblot = create_realistic_rorschach(size=1024, eth_address=eth_address)
-seeded_inkblot.save("seeded_inkblot.png")
+# Generate an inkblot with custom parameters
+custom_inkblot = create_noise_rorschach(
+    size=1024,
+    noise_scale=0.005,
+    seed=42
+)
+custom_inkblot.save("custom_inkblot.png")
 ```
 
-## Project Structure
+## How It Works
 
-```
-rorschach/
-├── __init__.py       # Package initialization
-├── main.py           # Core functionality
-├── shapes.py         # Shape generation
-├── tendrils.py       # Tendril and fractal extensions
-├── ink_effects.py    # Ink texture, drips, spots, etc.
-├── utils.py          # Utility functions
-└── example.py        # Example usage
-```
+This generator uses Perlin noise to create organic patterns with natural transitions. The noise field is used to:
+
+1. Determine color values (dark blue/purple or cream)
+2. Control opacity and transitions between colors
+3. Create natural-looking forms that maintain perfect symmetry
+
+The noise scale parameter controls how detailed the patterns are - smaller values create more detailed patterns, while larger values create broader, simpler forms.
 
 ## Dependencies
 

@@ -8,7 +8,7 @@ setup(
         "numpy",
         "Pillow",
     ],
-    description="A realistic Rorschach inkblot image generator",
+    description="A noise-based Rorschach inkblot image generator",
     author="Jon Bray",
     author_email="heyjonbray@pm.me",
     url="https://github.com/heyjonbray/infinite-inkblots",
