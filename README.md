@@ -14,8 +14,8 @@ This package generates realistic Rorschach-style inkblot test images with organi
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/rorschach-generator.git
-cd rorschach-generator
+git clone https://github.com/heyjonbray/infinite-inkblots.git
+cd infinite-inkblots
 
 # Install the package
 pip install -e .
