@@ -6,7 +6,7 @@
 
 - [ ] output svg instead of raster
 - [ ] trait extraction for metadata
-- [ ] add a frame around image (color deterministic)
+- [x] add a frame around image (color deterministic)
 
 ## Try
 
