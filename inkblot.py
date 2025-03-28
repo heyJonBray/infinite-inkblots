@@ -1,4 +1,5 @@
 import hashlib, random, math
+import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 # Finite color palettes (R, G, B)
@@ -52,31 +53,172 @@ def generate_pixel_inkblot(address: str, size=1024, grid=24, fill_prob=1.1) -> I
     # Step 4: create white background
     base = Image.new("RGBA", ink_layer.size, (255, 255, 255, 255))
 
-    # Step 5: create and add ink bleed underneath
-    bleed = create_ink_bleed_layer_blur(ink_layer, blur_radius=8, alpha=180)
-    combined = Image.alpha_composite(base, bleed)
+    # Step 5: create and add branching structures using cellular automata
+    branch_layer = create_pixel_branches(ink_layer, seed, iterations=4, branch_prob=0.6, fade_factor=0.2)
+    
+    # Step 6: Add ink drips for more Rorschach-like appearance
+    drip_layer = create_ink_drips(ink_layer, seed, drip_count=4)
+    
+    # Composite the layers
+    combined = Image.alpha_composite(base, branch_layer)
+    combined = Image.alpha_composite(combined, drip_layer)
     combined = Image.alpha_composite(combined, ink_layer)
 
-    # Step 6: add gradient border on top
+    # Step 7: add gradient border on top
     final = combined.convert("RGB")
     add_grid_border_gradient_colored(final, grid_size=grid, address=address)
 
     return final
 
 
-def create_ink_bleed_layer_blur(ink_img: Image.Image, blur_radius=6, alpha=180) -> Image.Image:
+def create_pixel_branches(ink_img: Image.Image, seed, iterations=4, branch_prob=0.28, fade_factor=0.7) -> Image.Image:
     """
-    Create a strong, soft black blur underneath the inkblot to simulate ink bleed.
+    Creates branching structures from the main ink blot using a cellular automata-like approach.
+    This preserves the pixel art style while creating natural-looking ink spread.
     """
-    # Extract the alpha channel from the ink layer
-    alpha_mask = ink_img.getchannel("A")
+    rnd = random.Random(seed + 123)
+    w, h = ink_img.size
+    
+    # Get alpha channel of original ink
+    ink_alpha = np.array(ink_img.getchannel("A"))
+    
+    # Create output layer (starts with zeros)
+    branches = np.zeros((h, w), dtype=np.uint8)
+    
+    # Find the edge pixels of the ink blot
+    # These will be our starting points for the branches
+    edge_mask = Image.fromarray(ink_alpha).filter(ImageFilter.FIND_EDGES)
+    edge_pixels = np.array(edge_mask) > 10
+    
+    # Create a list of edge pixel coordinates
+    edge_points = []
+    for y in range(h):
+        for x in range(w):
+            if edge_pixels[y, x]:
+                edge_points.append((x, y))
+    
+    # Neighbor directions (8-connected: cardinal + diagonal directions)
+    directions = [
+        (-1, -1), (0, -1), (1, -1),  # Above
+        (-1, 0),           (1, 0),   # Sides
+        (-1, 1),  (0, 1),  (1, 1)    # Below
+    ]
+    
+    # Direction weights - we can make downward directions more likely
+    # This simulates gravity's effect on ink
+    dir_weights = [
+        0.6, 0.7, 0.6,  # Above
+        0.8,      0.8,  # Sides
+        0.9, 1.0, 0.9   # Below (higher probability)
+    ]
+    
+    # Active points and their intensities
+    active_points = {}
+    for pt in edge_points:
+        active_points[pt] = 255  # Start with full intensity
+    
+    # Run the cellular automata for several iterations
+    for iteration in range(iterations):
+        new_active_points = active_points.copy()
+        
+        # Process each active point
+        for (x, y), intensity in active_points.items():
+            # Skip if intensity is too low
+            if intensity < 30:
+                continue
+                
+            # Determine next intensity level (fading)
+            next_intensity = int(intensity * fade_factor)
+            
+            # Try to branch in random directions
+            for i, (dx, dy) in enumerate(directions):
+                nx, ny = x + dx, y + dy
+                
+                # Check bounds
+                if nx < 0 or nx >= w or ny < 0 or ny >= h:
+                    continue
+                
+                # Skip if this pixel is already part of the solid ink
+                if ink_alpha[ny, nx] > 0:
+                    continue
+                
+                # Skip if this pixel already has higher intensity in branches
+                if branches[ny, nx] >= next_intensity:
+                    continue
+                
+                # Chance to create a branch in this direction
+                # Adjust probability based on direction and random factors
+                adjusted_prob = branch_prob * dir_weights[i]
+                
+                # Add random variation based on position
+                # This creates more organic growth patterns
+                pos_factor = 0.9 + 0.2 * math.sin(nx * 0.1) * math.cos(ny * 0.1)
+                adjusted_prob *= pos_factor
+                
+                if rnd.random() < adjusted_prob:
+                    # Add this point to the next iteration with reduced intensity
+                    new_active_points[(nx, ny)] = next_intensity
+                    branches[ny, nx] = next_intensity
+        
+        # Update active points for next iteration
+        active_points = {k: v for k, v in new_active_points.items() if v >= 20}
+    
+    # Create RGBA image from branches array
+    branch_img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    branch_img.putalpha(Image.fromarray(branches))
+    
+    return branch_img
 
-    # Create a fully black image with uniform alpha applied via the mask
-    black = Image.new("RGBA", ink_img.size, (0, 0, 0, alpha))
-    black.putalpha(alpha_mask)
 
-    # Apply Gaussian blur to simulate bleed
-    return black.filter(ImageFilter.GaussianBlur(blur_radius))
+def create_ink_drips(ink_img: Image.Image, seed, drip_count=8) -> Image.Image:
+    """
+    Creates vertical drip effects that commonly appear in ink blots
+    """
+    rnd = random.Random(seed + 456)
+    w, h = ink_img.size
+    drips = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(drips)
+    
+    # Find the bottom edge of the ink blot
+    ink_alpha = np.array(ink_img.getchannel("A"))
+    
+    # Scan the bottom half of the image
+    for x in range(w):
+        for y in range(h//2, h-20):  # Start from middle, avoid very bottom
+            # If we find an ink pixel and there's empty space below it
+            if ink_alpha[y, x] > 200 and y+1 < h and ink_alpha[y+1, x] < 50:
+                # Potential drip starting point
+                if rnd.random() < 0.03:  # Only create drips at some edge points
+                    # Create a drip
+                    drip_length = rnd.randint(5, 25)
+                    drip_width = rnd.randint(1, 3)
+                    
+                    # Vary the drip shape
+                    points = [(x, y)]
+                    current_y = y
+                    drift = 0
+                    
+                    for i in range(drip_length):
+                        # Allow slight horizontal drift
+                        drift += rnd.uniform(-0.3, 0.3)
+                        drift = max(-drip_width, min(drip_width, drift))
+                        
+                        current_y += 1
+                        current_x = int(x + drift)
+                        
+                        # Ensure within bounds
+                        current_x = max(0, min(w-1, current_x))
+                        if current_y >= h:
+                            break
+                            
+                        points.append((current_x, current_y))
+                    
+                    # Draw the drip with fading opacity
+                    for i, (px, py) in enumerate(points):
+                        opacity = int(255 * (1 - i/len(points))**0.8)
+                        draw.rectangle([px, py, px+drip_width-1, py], fill=(0, 0, 0, opacity))
+    
+    return drips
 
 
 def add_grid_splatter(img, draw, seed, grid_size, scale, count):
@@ -163,7 +305,7 @@ def add_grid_border_gradient_colored(img, grid_size, address):
 
 # Example usage
 if __name__ == "__main__":
-    address = "0xddeF9dd040cF7B41a1AF9e4A24A0EDB04093dD69"
+    address = "0x7e2F9dd040cF7B41a1A0000004A0EDB04093dD69"
     img = generate_pixel_inkblot(address)
     metadata = get_palette_metadata(address)
     print(metadata)
