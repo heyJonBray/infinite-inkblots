@@ -7,6 +7,7 @@
 - [ ] output svg instead of raster
 - [ ] trait extraction for metadata
 - [x] add a frame around image (color deterministic)
+- [ ] gold frame for '420' and "69" addresses
 
 ## Try
 
