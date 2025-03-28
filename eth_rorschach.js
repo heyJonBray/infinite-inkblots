@@ -1,5 +1,4 @@
 // Ethereum Rorschach Generator
-// Based on Nicolas Decoster's code, adapted for ETH address-based generation
 
 const { createCanvas } = require('canvas');
 const fs = require('fs');
@@ -12,16 +11,20 @@ class EthereumRorschachGenerator {
     this.ethAddress = options.ethAddress || null;
     this.outputPath = options.outputPath || 'out/eth_rorschach.png';
     this.frameCount = 0;
-    this.particleCount = options.particleCount || 2000;
-    this.runDuration = options.runDuration || 1000; // Number of frames to run
+    this.particleCount = options.particleCount || 200;
+    this.runDuration = options.runDuration || 500; // Increased default frames for better convergence
 
     // Visual parameters
     this.params = {
       size: this.size,
-      speed: options.speed || 0.005,
-      scale: options.scale || 0.008,
-      maxRadius: options.maxRadius || 8,
+      speed: options.speed || 0.001, // Lower speed for less variation
+      scale: options.scale || 0.006, // Smaller scale for more detailed patterns
+      maxRadius: options.maxRadius || 6, // Smaller default radius
     };
+
+    // Black inkblot effect settings
+    this.inkblotEffect = options.inkblotEffect !== false;
+    this.fadeRate = options.fadeRate || 0.02; // Fade rate for trails
 
     this.offsets = {
       x: this.params.size / 2,
@@ -54,7 +57,7 @@ class EthereumRorschachGenerator {
       return Math.floor(Math.random() * 10000);
     }
 
-    // Normalize the address
+    // Remove 0x prefix and convert to lowercase
     const normalizedAddress = this.ethAddress.toLowerCase().replace('0x', '');
 
     // Create a hash of the address
@@ -106,14 +109,27 @@ class EthereumRorschachGenerator {
     const features = this.extractEthFeatures();
     if (!features) return;
 
-    // Map features to visual parameters
-    this.params.scale = 0.005 + features.charDiversity * 0.01;
-    this.params.maxRadius = 5 + features.oneCount * 0.2;
-    this.params.speed = 0.004 + features.highCharRatio * 0.005;
-    this.particleCount = 1500 + features.zeroCount * 50;
+    // Map features to visual parameters - adjusted for more inkblot-like results
+    this.params.scale = 0.004 + features.charDiversity * 0.005; // Smaller scale range
+    this.params.maxRadius = 3 + features.oneCount * 0.3; // Smaller particles
+    this.params.speed = 0.0005 + features.highCharRatio * 0.001; // Slower evolution
+
+    // Higher particle count for more cohesive blobs
+    this.particleCount = 2500 + features.zeroCount * 100;
+
+    // Adjust fade rate based on character diversity
+    this.fadeRate = 0.01 + (1 - features.charDiversity) * 0.03;
 
     // Choose color scheme based on ETH address characteristics
     this.colorScheme = this.selectColorScheme(features);
+
+    // Disable colored schemes randomly based on even/odd ratio for more variety
+    // but with a bias toward monochrome for Rorschach-like effect
+    if (features.evenCharRatio > 0.4 || Math.random() > 0.7) {
+      this.inkblotEffect = true;
+    } else {
+      this.inkblotEffect = false;
+    }
   }
 
   // Select a color scheme based on ETH features
@@ -252,7 +268,8 @@ class EthereumRorschachGenerator {
 
   // Fade out existing content (used for animation effect)
   fadeOut() {
-    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    // Use a slower fade for more persistent trails
+    this.ctx.fillStyle = `rgba(255, 255, 255, ${this.fadeRate})`;
     this.ctx.fillRect(0, 0, this.params.size, this.params.size);
   }
 
@@ -269,43 +286,53 @@ class EthereumRorschachGenerator {
   getPlotter(value) {
     let colors;
 
-    // Select color scheme
-    switch (this.colorScheme) {
-      case 'blues':
-        colors = [
-          [255, 255, 255, 0], // Transparent
-          [85, 142, 213, 150], // Light blue
-          [45, 96, 179, 150], // Medium blue
-          [28, 69, 135, 150], // Dark blue
-          [50, 50, 50, 150], // Gray
-        ];
-        break;
-      case 'reds':
-        colors = [
-          [255, 255, 255, 0], // Transparent
-          [235, 85, 85, 150], // Light red
-          [213, 45, 45, 150], // Medium red
-          [179, 18, 18, 150], // Dark red
-          [50, 50, 50, 150], // Gray
-        ];
-        break;
-      case 'grayscale':
-        colors = [
-          [255, 255, 255, 0], // Transparent
-          [200, 200, 200, 150], // Light gray
-          [128, 128, 128, 150], // Medium gray
-          [50, 50, 50, 150], // Dark gray
-          [0, 0, 0, 150], // Black
-        ];
-        break;
-      default: // Original scheme
-        colors = [
-          [255, 255, 255, 0], // Transparent
-          [235, 23, 25, 150], // Red
-          [28, 69, 113, 150], // Blue
-          [0, 0, 0, 150], // Black
-        ];
-        break;
+    // If inkblot effect is enabled, use primarily dark colors
+    if (this.inkblotEffect) {
+      colors = [
+        [255, 255, 255, 0], // Transparent
+        [30, 30, 30, 200], // Very dark gray
+        [10, 10, 10, 220], // Almost black
+        [0, 0, 0, 240], // Pure black
+      ];
+    } else {
+      // Select color scheme
+      switch (this.colorScheme) {
+        case 'blues':
+          colors = [
+            [255, 255, 255, 0], // Transparent
+            [85, 142, 213, 150], // Light blue
+            [45, 96, 179, 150], // Medium blue
+            [28, 69, 135, 150], // Dark blue
+            [50, 50, 50, 150], // Gray
+          ];
+          break;
+        case 'reds':
+          colors = [
+            [255, 255, 255, 0], // Transparent
+            [235, 85, 85, 150], // Light red
+            [213, 45, 45, 150], // Medium red
+            [179, 18, 18, 150], // Dark red
+            [50, 50, 50, 150], // Gray
+          ];
+          break;
+        case 'grayscale':
+          colors = [
+            [255, 255, 255, 0], // Transparent
+            [200, 200, 200, 150], // Light gray
+            [128, 128, 128, 150], // Medium gray
+            [50, 50, 50, 150], // Dark gray
+            [0, 0, 0, 150], // Black
+          ];
+          break;
+        default: // Original scheme
+          colors = [
+            [255, 255, 255, 0], // Transparent
+            [235, 23, 25, 150], // Red
+            [28, 69, 113, 150], // Blue
+            [0, 0, 0, 150], // Black
+          ];
+          break;
+      }
     }
 
     // Size of an interval
@@ -338,29 +365,65 @@ class EthereumRorschachGenerator {
     // Create a seeded random function
     const seedRng = this.seededRandom(this.seed + this.frameCount);
 
-    // Draw particles
+    // Cluster centers - for more Rorschach-like blots
+    let clusterCount = 5 + Math.floor(seedRng() * 5); // 5-9 main clusters
+    let clusters = [];
+
+    // Generate cluster centers
+    for (let i = 0; i < clusterCount; i++) {
+      // Only generate clusters in the upper half for vertical symmetry
+      clusters.push({
+        x: seedRng() * 0.8 - 0.4, // -0.4 to 0.4 range for x
+        y: -0.1 - seedRng() * 0.4, // -0.1 to -0.5 range for y (upper half only)
+        strength: 0.2 + seedRng() * 0.3, // Strength of attraction
+      });
+    }
+
+    // Draw particles with cluster influence
     for (let i = 0; i < this.particleCount; i++) {
       const a = seedRng() * 100;
       const b = seedRng() * 100;
 
-      // Generate base coordinates
-      const baseX = this.noise(a, b);
-      const baseY = this.noise(b, a);
+      // Generate base coordinates with noise
+      let baseX = this.noise(a, b);
+      let baseY = this.noise(b, a);
+
+      // Apply cluster attraction
+      let totalInfluence = 0;
+      clusters.forEach((cluster) => {
+        const dx = baseX - (cluster.x + 0.5); // +0.5 to center
+        const dy = baseY - (cluster.y + 0.5);
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // Inverse square influence
+        const influence = cluster.strength / (distance * distance + 0.01);
+        totalInfluence += influence;
+
+        // Pull particles toward cluster
+        baseX = baseX - dx * influence * 0.1;
+        baseY = baseY - dy * influence * 0.1;
+      });
+
+      // Add some noise based on influence to create more organic shapes
+      if (totalInfluence > 0.1) {
+        baseX += (seedRng() - 0.5) * 0.05 * totalInfluence;
+        baseY += (seedRng() - 0.5) * 0.05 * totalInfluence;
+      }
 
       // Scale to appropriate range and center
-      const scaleFactor = 0.8;
+      const scaleFactor = 0.9; // Slightly larger scale
       const x0 = (baseX - 0.5) * this.size * scaleFactor;
       const y0 = (baseY - 0.5) * this.size * scaleFactor;
 
-      // Apply rotation for symmetry
-      const angle = (-Math.PI * 3) / 4;
-      const [x, y] = this.rotatePlotter(x0, y0, angle);
+      // No rotation, just keep vertical symmetry which is typical for Rorschach
+      const x = x0;
+      const y = y0;
 
       // Add offsets to center in canvas
       const x1 = x + this.offsets.x;
       const y1 = y + this.offsets.y;
 
-      // Symmetry - create mirrored particle
+      // Symmetry - create vertically mirrored particle (left-right symmetry is standard for Rorschach)
       const x2 = -x + this.offsets.x;
       const y2 = y + this.offsets.y;
 
@@ -376,16 +439,21 @@ class EthereumRorschachGenerator {
       // Skip transparent particles
       if (plotter.color[3] <= 0) continue;
 
+      // Increase radius based on cluster influence for more blob-like shapes
+      const adjustedRadius = plotter.radius * (1 + totalInfluence);
+
       // Draw the particles
       this.ctx.fillStyle = `rgba(${plotter.color[0]}, ${plotter.color[1]}, ${
         plotter.color[2]
       }, ${plotter.color[3] / 255})`;
+
+      // Draw particles with slightly higher transparency around the edges
       this.ctx.beginPath();
-      this.ctx.arc(x1, y1, plotter.radius, 0, Math.PI * 2);
+      this.ctx.arc(x1, y1, adjustedRadius, 0, Math.PI * 2);
       this.ctx.fill();
 
       this.ctx.beginPath();
-      this.ctx.arc(x2, y2, plotter.radius, 0, Math.PI * 2);
+      this.ctx.arc(x2, y2, adjustedRadius, 0, Math.PI * 2);
       this.ctx.fill();
     }
 
@@ -400,7 +468,7 @@ class EthereumRorschachGenerator {
 
     // Run animation until completion
     console.log(
-      `Generating Rorschach from address: ${this.ethAddress || 'random'}`
+      `Generating Rorschach from ETH address: ${this.ethAddress || 'random'}`
     );
     console.log(`Using seed: ${this.seed}`);
 
@@ -473,16 +541,22 @@ module.exports = { EthereumRorschachGenerator };
 function main() {
   const args = processArguments();
 
+  // Ensure ethAddress is properly handled as a string
+  const ethAddress = args.ethAddress ? String(args.ethAddress) : null;
+  const outputPath =
+    args.outputPath || `out/particle_ror_${ethAddress || 'random'}.png`;
+
   const generator = new EthereumRorschachGenerator({
     size: args.size || 800,
-    ethAddress: args.ethAddress,
-    outputPath:
-      args.outputPath || `out/particle_ror_${args.ethAddress || 'random'}.png`,
-    particleCount: args.particleCount || 2000,
+    ethAddress: ethAddress,
+    outputPath: outputPath,
+    particleCount: args.particleCount || 3000, // Higher default for more cohesive shapes
     runDuration: args.runDuration || 1000,
-    scale: args.scale || 0.008,
-    maxRadius: args.maxRadius || 8,
-    speed: args.speed || 0.005,
+    scale: args.scale || 0.006,
+    maxRadius: args.maxRadius || 5,
+    speed: args.speed || 0.001,
+    inkblotEffect: args.inkblotEffect !== false, // Enable by default
+    fadeRate: args.fadeRate || 0.02,
   });
 
   const traits = generator.generate();
@@ -501,16 +575,14 @@ function main() {
     }
 
     // Create metadata filename
-    const addressPart = args.ethAddress
-      ? args.ethAddress.substring(0, 8)
-      : 'random';
+    const addressPart = ethAddress ? ethAddress.substring(0, 8) : 'random';
     const metadataPath = `${metadataDir}/metadata_${addressPart}.json`;
 
     const metadata = {
       name: `Infinite Inkblot ${addressPart}`,
       description:
         'A unique Rorschach-style inkblot generated from an Ethereum address',
-      image: args.outputPath.split('/').pop(),
+      image: generator.outputPath.split('/').pop(),
       attributes: Object.entries(traits).map(([trait_type, value]) => ({
         trait_type,
         value,
@@ -536,9 +608,14 @@ function processArguments() {
           ? process.argv[++i]
           : true;
 
-      // Convert numeric values
-      args[key] =
-        !isNaN(value) && typeof value === 'string' ? Number(value) : value;
+      // Special case for ethAddress - always keep as string
+      if (key === 'ethAddress') {
+        args[key] = String(value);
+      } else {
+        // Convert numeric values for other parameters
+        args[key] =
+          !isNaN(value) && typeof value === 'string' ? Number(value) : value;
+      }
     }
   }
 
