@@ -18,7 +18,7 @@
 - [ ] feathered edges for soaked-ink effect
 - [ ] layered ink passes with different radii, density, pattern
 
-### For another project...
+### For another project
 
 - [ ] try mirrored cellular automaton/flow simulation pixel-style
 
@@ -26,3 +26,5 @@
 
 - seed
 - splatter
+- frame
+-
