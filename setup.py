@@ -1,14 +1,14 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="rorschach-generator",
-    version="0.1.0",
+    name="infinite-inkblots",
+    version="1.0.0",
     packages=find_packages(),
     install_requires=[
         "numpy",
         "Pillow",
     ],
-    description="A realistic Rorschach inkblot image generator",
+    description="Generate unique Rorschach-style inkblots from Ethereum addresses",
     author="Jon Bray",
     author_email="heyjonbray@pm.me",
     url="https://github.com/heyjonbray/infinite-inkblots",
@@ -20,7 +20,7 @@ setup(
     python_requires=">=3.6",
     entry_points={
         'console_scripts': [
-            'generate-rorschach=rorschach.example:main',
+            'generate-inkblot=rorschach.example:main',
         ],
     },
 )

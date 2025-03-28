@@ -1,3 +1,3 @@
-from .main import create_realistic_rorschach
+from .inkblot import create_inkblot
 
-__all__ = ['create_realistic_rorschach']
+__all__ = ['create_inkblot']
