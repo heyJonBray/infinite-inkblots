@@ -1,5 +1,7 @@
 import hashlib
 import re
+import itertools
+import random
 
 def extract_eth_features(eth_address):
     """
@@ -22,7 +24,7 @@ def extract_eth_features(eth_address):
     # Create hash for deterministic seed
     hash_object = hashlib.sha256(address.encode())
     hex_digest = hash_object.hexdigest()
-    seed = int(hex_digest[:8], 16)  # Using only 8 hex chars to stay under 2^32
+    seed = int(hex_digest[:8], 16)  # Use first 8 chars to stay under 2^32
     
     # Extract features from the address
     features = {
@@ -142,6 +144,3 @@ def get_eth_color_scheme(eth_features):
         'contrast_level': contrast_level,
         'threshold': threshold
     }
-
-# Add missing import
-import itertools
