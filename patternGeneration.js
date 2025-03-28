@@ -16,6 +16,8 @@ const params = {
   maxRadius: 8, // Maximum particle radius
   fadeAlpha: 5, // Fade-out alpha value (lower = more particle accumulation)
   outputPath: './output', // Output directory
+  horizontalMargin: 0.1, // 10% margin on left/right edges
+  verticalMargin: 0.15, // 15% margin on top/bottom edges
 };
 
 // Offsets for proper placement
@@ -297,10 +299,13 @@ function fadeOut(ctx, size, alpha) {
  * @returns {Object} Particle positions (original and mirrored)
  */
 function createSymmetricalParticle(seededRandom, size) {
-  // Generate a point in the right half of the canvas
-  const xOffset = size / 4; // Use quarter of canvas width
-  const x = seededRandom() * 0.5 * size + xOffset;
-  const y = seededRandom() * size;
+  // Calculate the usable area dimensions
+  const usableWidth = size * (1 - 2 * params.horizontalMargin);
+  const usableHeight = size * (1 - 2 * params.verticalMargin);
+
+  // Generate a point in the left half of the usable area, then adjust for margin
+  const x = seededRandom() * (usableWidth / 2) + size * params.horizontalMargin;
+  const y = seededRandom() * usableHeight + size * params.verticalMargin;
 
   // Create the mirrored point for perfect bilateral symmetry
   const mirrorX = size - x;
@@ -365,6 +370,10 @@ function generateParticleRorschach(ethAddress, customParams = {}) {
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, currentParams.size, currentParams.size);
 
+  // Update offsets to account for margins
+  const centerX = currentParams.size / 2;
+  const centerY = currentParams.size / 2;
+
   console.log(
     `Generating particle-based Rorschach with ${currentParams.framesToRender} frames and ${currentParams.particleCount} particles per frame...`
   );
@@ -382,38 +391,55 @@ function generateParticleRorschach(ethAddress, customParams = {}) {
         currentParams.size
       );
 
-      // Process both the original and mirrored particles
-      [particles.original, particles.mirrored].forEach((particle) => {
-        // Get plotter properties based on position and current frame
-        const xNoise = particle.x * currentParams.scale;
-        const yNoise = particle.y * currentParams.scale;
-        const timeNoise = frame * currentParams.speed;
+      // Get plotter properties based on position and current frame - only calculate once
+      // for the original particle, and use the same for the mirrored one
+      const xNoise = particles.original.x * currentParams.scale;
+      const yNoise = particles.original.y * currentParams.scale;
+      const timeNoise = frame * currentParams.speed;
 
-        // Calculate noise value
-        const noiseValue = noise(xNoise, yNoise, timeNoise);
+      // Calculate noise value
+      const noiseValue = noise(xNoise, yNoise, timeNoise);
 
-        // Add distance-based weighting to create more structure
-        const distanceFromCenter = Math.sqrt(
-          Math.pow((particle.x - offsets.x) / currentParams.size, 2) +
-            Math.pow((particle.y - offsets.y) / currentParams.size, 2)
-        );
+      // Add distance-based weighting to create more structure
+      const distanceFromCenter = Math.sqrt(
+        Math.pow((particles.original.x - centerX) / currentParams.size, 2) +
+          Math.pow((particles.original.y - centerY) / currentParams.size, 2)
+      );
 
-        // Adjusted noise value based on distance from center
-        const adjustedValue = noiseValue * (1 - distanceFromCenter * 0.5);
+      // Adjusted noise value based on distance from center
+      const adjustedValue = noiseValue * (1 - distanceFromCenter * 0.5);
 
-        // Get plotter properties
-        const plotter = getPlotter(
-          adjustedValue,
-          colors,
-          currentParams.maxRadius
-        );
+      // Get plotter properties - only once for both particles
+      const plotter = getPlotter(
+        adjustedValue,
+        colors,
+        currentParams.maxRadius
+      );
 
-        // Draw the particle
-        ctx.fillStyle = plotter.color;
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, plotter.radius, 0, 2 * Math.PI);
-        ctx.fill();
-      });
+      // Draw both particles with the same color and radius
+      ctx.fillStyle = plotter.color;
+
+      // Draw the original particle (left side)
+      ctx.beginPath();
+      ctx.arc(
+        particles.original.x,
+        particles.original.y,
+        plotter.radius,
+        0,
+        2 * Math.PI
+      );
+      ctx.fill();
+
+      // Draw the mirrored particle (right side)
+      ctx.beginPath();
+      ctx.arc(
+        particles.mirrored.x,
+        particles.mirrored.y,
+        plotter.radius,
+        0,
+        2 * Math.PI
+      );
+      ctx.fill();
     }
 
     // Progress indicator
