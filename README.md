@@ -1,21 +1,34 @@
-# Noise-Based Rorschach Generator
+# Infinite Inkblots
 
-This package generates beautiful Rorschach-style inkblot images using Perlin noise. The generator creates symmetrical inkblots with gradients and color transitions inspired by traditional ink on paper.
+A generative art project that creates beautiful Rorschach-style inkblot images from Ethereum addresses. Each address produces a unique, deterministic inkblot pattern that can be used as NFT art.
 
 ## Features
 
-- Perlin noise-based inkblot generation
-- Beautiful color gradients (dark blue/purple to cream)
+- Ethereum address-based deterministic generation
+- Perlin noise foundation for organic patterns
+- Grayscale inkblots with subtle gradients
 - Perfect symmetry with organic forms
-- Control over noise scale and pattern detail
-- Deterministic generation using seeds
+- Address-specific visual characteristics:
+  - Pattern complexity based on character diversity
+  - Ink density determined by character distribution
+  - Contrast derived from address features
+  - Shape characteristics tied to specific address patterns
 
 ## Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/noise-rorschach.git
-cd noise-rorschach
+git clone https://github.com/yourusername/infinite-inkblots.git
+cd infinite-inkblots
+
+# Create a virtual environment
+python -m venv venv
+
+# Activate the virtual environment
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
 
 # Install the package
 pip install -e .
@@ -23,7 +36,7 @@ pip install -e .
 
 ## Usage
 
-### As a Command Line Tool
+### Command Line Interface
 
 After installation, you can use the included command line tool:
 
@@ -31,43 +44,53 @@ After installation, you can use the included command line tool:
 # Generate a random inkblot
 generate-rorschach --output my_inkblot.png
 
-# Generate an inkblot with a specific size
-generate-rorschach --size 1024 --output large_inkblot.png
+# Generate an inkblot from an Ethereum address
+generate-rorschach --eth-address 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
 
-# Generate an inkblot with a specific noise scale
-generate-rorschach --noise-scale 0.005 --output detailed_inkblot.png
+# Customize parameters
+generate-rorschach --size 1024 --noise-scale 0.005 --eth-address 0x742d35Cc6634C0532925a3b844Bc454e4438f44e
+```
 
-# Generate a reproducible inkblot with a specific seed
-generate-rorschach --seed 42 --output seeded_inkblot.png
+### Ethereum Address Demo
+
+Run the demo script to see how different Ethereum addresses create unique patterns:
+
+```bash
+python eth_demo.py
 ```
 
 ### As a Python Package
 
 ```python
-from noise_rorschach import create_noise_rorschach
+from rorschach import create_noise_rorschach
 
 # Generate a random inkblot
 inkblot = create_noise_rorschach(size=800)
 inkblot.save("random_inkblot.png")
 
-# Generate an inkblot with custom parameters
-custom_inkblot = create_noise_rorschach(
-    size=1024,
-    noise_scale=0.005,
-    seed=42
-)
-custom_inkblot.save("custom_inkblot.png")
+# Generate an inkblot from an Ethereum address
+eth_address = "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4"
+eth_inkblot = create_noise_rorschach(size=800, eth_address=eth_address)
+eth_inkblot.save("eth_inkblot.png")
 ```
 
 ## How It Works
 
-This generator uses Perlin noise to create organic patterns with natural transitions. The noise field is used to:
+Infinite Inkblots uses Perlin noise to create organic patterns with natural transitions. When an Ethereum address is provided:
 
-1. Determine color values (dark blue/purple or cream)
-2. Control opacity and transitions between colors
-3. Create natural-looking forms that maintain perfect symmetry
+1. Features are extracted from the address (character distribution, patterns, etc.)
+2. These features modify the Perlin noise parameters
+3. The modified parameters create unique visual characteristics
+4. The result is a deterministic inkblot that's unique to that address
 
-The noise scale parameter controls how detailed the patterns are - smaller values create more detailed patterns, while larger values create broader, simpler forms.
+## Parameters
+
+- `size`: Size of the output image in pixels (square)
+- `noise_scale`: Scale of the noise (smaller values = more detailed patterns)
+- `eth_address`: Ethereum address to use for deterministic generation
+- `contrast`: Contrast adjustment for the noise
+- `threshold`: Threshold value for ink vs background
+- `vertical_fix`: Apply vertical adjustment to prevent banding at bottom
 
 ## Dependencies
 
