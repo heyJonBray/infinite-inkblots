@@ -1,18 +1,15 @@
 # Infinite Inkblots
 
-A generative art project that creates beautiful Rorschach-style inkblots from Ethereum addresses. Each address produces a unique, deterministic inkblot pattern that can be used as NFT art.
+A generative art project that creates beautiful particle-based Rorschach-style inkblots from Ethereum addresses. Each address produces a unique, deterministic inkblot pattern that can be used as NFT art.
 
 ## Features
 
-- Ethereum address-based deterministic generation
-- Perlin noise foundation for organic patterns
-- Grayscale inkblots with subtle gradients and natural textures
-- Perfect symmetry with organic edge details (drips, tendrils, spots)
-- Address-specific visual characteristics:
-  - Pattern complexity based on character diversity
-  - Ink density determined by character distribution
-  - Contrast derived from address features
-  - Shape characteristics tied to specific address patterns
+- **Particle-Based Generation**: Creates beautiful organic patterns from thousands of small particles
+- **Ethereum Address Integration**: Deterministic generation based on address features
+- **Perfect Symmetry**: Creates the classic Rorschach "butterfly" pattern
+- **Color Schemes**: Multiple color options derived from address characteristics
+- **NFT-Ready**: Automatic trait extraction for NFT metadata
+- **High Quality**: Renders clean, high-resolution images
 
 ## Installation
 
@@ -21,93 +18,102 @@ A generative art project that creates beautiful Rorschach-style inkblots from Et
 git clone https://github.com/yourusername/infinite-inkblots.git
 cd infinite-inkblots
 
-# Create a virtual environment
-python -m venv venv
-
-# Activate the virtual environment
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
-
-# Install the package in development mode
-pip install -e .
+# Install dependencies
+npm install
 ```
+
+### Requirements
+
+- Node.js (v14 or higher)
+- The only dependency is the `canvas` package
 
 ## Usage
 
-### Command Line Interface
-
-After installation, you can generate inkblots using the included command line tool:
+### Basic Usage
 
 ```bash
-# Generate a random inkblot
-generate-inkblot --output my_inkblot.png
+node eth_rorschach.js --ethAddress 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
+```
 
-# Generate an inkblot from an Ethereum address
-generate-inkblot --eth-address 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
+### Advanced Options
 
-# Customize parameters
-generate-inkblot --size 1024 --whitespace 0.2 --detail-intensity 0.8 --eth-address 0x742d35Cc6634C0532925a3b844Bc454e4438f44e
+```bash
+node eth_rorschach.js \
+  --ethAddress 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4 \
+  --size 1200 \
+  --particleCount 2500 \
+  --runDuration 1000 \
+  --outputPath out/custom_name.png \
+  --saveMetadata
 ```
 
 ### Parameters
 
-- `--size`: Size of the output image in pixels (square)
-- `--eth-address`: Ethereum address for deterministic generation
-- `--whitespace`: Margin around the inkblot (0.0-0.3)
-- `--detail-intensity`: Amount of edge details to add (0.0-1.0)
-- `--no-details`: Disable edge details entirely
-- `--noise-scale`: Scale of the Perlin noise (lower = more detail)
+- `--ethAddress`: Ethereum address for deterministic generation
+- `--size`: Canvas size in pixels (default: 800)
+- `--outputPath`: Path for saving the output image
+- `--particleCount`: Number of particles per frame
+- `--runDuration`: Number of frames to generate
+- `--scale`: Noise scale (smaller = more detailed)
+- `--maxRadius`: Maximum particle radius
+- `--saveMetadata`: Flag to save NFT metadata
 
-### Ethereum Address Demo
+### Batch Generation
 
-Run the demo script to see how different Ethereum addresses create unique patterns:
+To generate multiple examples from different Ethereum addresses:
 
 ```bash
-python eth_demo.py
-```
-
-This will generate multiple inkblots from sample addresses and save them to `out/eth_demo/`.
-
-### Using as a Python Package
-
-```python
-from rorschach import create_inkblot
-
-# Generate a random inkblot
-inkblot = create_inkblot(size=800)
-inkblot.save("random_inkblot.png")
-
-# Generate an inkblot from an Ethereum address
-eth_address = "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4"
-eth_inkblot = create_inkblot(
-    size=800,
-    eth_address=eth_address,
-    whitespace_margin=0.15,
-    detail_intensity=0.7
-)
-eth_inkblot.save("eth_inkblot.png")
+node examples.js
 ```
 
 ## How It Works
 
-Infinite Inkblots combines multiple techniques to create unique, deterministic inkblots:
+Infinite Inkblots uses a particle-based animation approach to create Rorschach-like patterns:
 
-1. **Ethereum Address Analysis**: Features are extracted from the address (character distribution, patterns, etc.)
+1. **Ethereum Address Analysis**: The system extracts unique features from the address
+2. **Parameter Mapping**: These features influence visual aspects like color, density, and detail
+3. **Progressive Generation**: Particles are added frame by frame with a fade effect
+4. **Symmetry Application**: Perfect mirroring creates the classic Rorschach look
+5. **Trait Extraction**: NFT metadata is derived from the generation parameters
 
-2. **Perlin Noise Foundation**: These features modify Perlin noise parameters to create the base shapes
+## Example Outputs
 
-3. **Edge Detail Enhancement**: Organic details like drips, tendrils, and ink spots are added to the edges
+Different Ethereum addresses produce distinctly different inkblots:
 
-4. **Composition Optimization**: The inkblot is centered in the canvas with appropriate margins
+- Zero address (0x000...): Tends to create very symmetrical, structured patterns
+- Addresses with many repeating characters: Creates more uniform, consistent patterns
+- Addresses with high character diversity: Produces more complex, detailed patterns
+- Specific character distributions: Influences color and density distributions
 
-The same Ethereum address will always produce the same inkblot pattern, making it suitable for NFT projects.
+## NFT Integration
 
-## Dependencies
+The generator automatically extracts traits for NFT metadata:
 
-- NumPy
-- Pillow (PIL)
+```json
+{
+  "name": "Infinite Inkblot #123",
+  "description": "A unique Rorschach-style inkblot generated from an Ethereum address",
+  "image": "particle_ror_0x1234.png",
+  "attributes": [
+    {
+      "trait_type": "ColorScheme",
+      "value": "Blues"
+    },
+    {
+      "trait_type": "ParticleDensity",
+      "value": "Medium"
+    },
+    {
+      "trait_type": "ParticleSize",
+      "value": "Medium"
+    },
+    {
+      "trait_type": "Complexity",
+      "value": "High"
+    }
+  ]
+}
+```
 
 ## License
 
@@ -115,4 +121,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-Inspired by the classic Rorschach psychological test and the rich tradition of generative art.
+- Particle distribution approach inspired by Nicolas Decoster's P5.js implementation
+- Built on the rich tradition of generative art and NFT collections
