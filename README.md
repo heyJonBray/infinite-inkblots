@@ -1,13 +1,13 @@
 # Infinite Inkblots
 
-A generative art project that creates beautiful Rorschach-style inkblot images from Ethereum addresses. Each address produces a unique, deterministic inkblot pattern that can be used as NFT art.
+A generative art project that creates beautiful Rorschach-style inkblots from Ethereum addresses. Each address produces a unique, deterministic inkblot pattern that can be used as NFT art.
 
 ## Features
 
 - Ethereum address-based deterministic generation
 - Perlin noise foundation for organic patterns
-- Grayscale inkblots with subtle gradients
-- Perfect symmetry with organic forms
+- Grayscale inkblots with subtle gradients and natural textures
+- Perfect symmetry with organic edge details (drips, tendrils, spots)
 - Address-specific visual characteristics:
   - Pattern complexity based on character diversity
   - Ink density determined by character distribution
@@ -30,7 +30,7 @@ venv\Scripts\activate
 # On macOS/Linux:
 source venv/bin/activate
 
-# Install the package
+# Install the package in development mode
 pip install -e .
 ```
 
@@ -38,18 +38,27 @@ pip install -e .
 
 ### Command Line Interface
 
-After installation, you can use the included command line tool:
+After installation, you can generate inkblots using the included command line tool:
 
 ```bash
 # Generate a random inkblot
-generate-rorschach --output my_inkblot.png
+generate-inkblot --output my_inkblot.png
 
 # Generate an inkblot from an Ethereum address
-generate-rorschach --eth-address 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
+generate-inkblot --eth-address 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
 
 # Customize parameters
-generate-rorschach --size 1024 --noise-scale 0.005 --eth-address 0x742d35Cc6634C0532925a3b844Bc454e4438f44e
+generate-inkblot --size 1024 --whitespace 0.2 --detail-intensity 0.8 --eth-address 0x742d35Cc6634C0532925a3b844Bc454e4438f44e
 ```
+
+### Parameters
+
+- `--size`: Size of the output image in pixels (square)
+- `--eth-address`: Ethereum address for deterministic generation
+- `--whitespace`: Margin around the inkblot (0.0-0.3)
+- `--detail-intensity`: Amount of edge details to add (0.0-1.0)
+- `--no-details`: Disable edge details entirely
+- `--noise-scale`: Scale of the Perlin noise (lower = more detail)
 
 ### Ethereum Address Demo
 
@@ -59,38 +68,41 @@ Run the demo script to see how different Ethereum addresses create unique patter
 python eth_demo.py
 ```
 
-### As a Python Package
+This will generate multiple inkblots from sample addresses and save them to `out/eth_demo/`.
+
+### Using as a Python Package
 
 ```python
-from rorschach import create_noise_rorschach
+from rorschach import create_inkblot
 
 # Generate a random inkblot
-inkblot = create_noise_rorschach(size=800)
+inkblot = create_inkblot(size=800)
 inkblot.save("random_inkblot.png")
 
 # Generate an inkblot from an Ethereum address
 eth_address = "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4"
-eth_inkblot = create_noise_rorschach(size=800, eth_address=eth_address)
+eth_inkblot = create_inkblot(
+    size=800,
+    eth_address=eth_address,
+    whitespace_margin=0.15,
+    detail_intensity=0.7
+)
 eth_inkblot.save("eth_inkblot.png")
 ```
 
 ## How It Works
 
-Infinite Inkblots uses Perlin noise to create organic patterns with natural transitions. When an Ethereum address is provided:
+Infinite Inkblots combines multiple techniques to create unique, deterministic inkblots:
 
-1. Features are extracted from the address (character distribution, patterns, etc.)
-2. These features modify the Perlin noise parameters
-3. The modified parameters create unique visual characteristics
-4. The result is a deterministic inkblot that's unique to that address
+1. **Ethereum Address Analysis**: Features are extracted from the address (character distribution, patterns, etc.)
 
-## Parameters
+2. **Perlin Noise Foundation**: These features modify Perlin noise parameters to create the base shapes
 
-- `size`: Size of the output image in pixels (square)
-- `noise_scale`: Scale of the noise (smaller values = more detailed patterns)
-- `eth_address`: Ethereum address to use for deterministic generation
-- `contrast`: Contrast adjustment for the noise
-- `threshold`: Threshold value for ink vs background
-- `vertical_fix`: Apply vertical adjustment to prevent banding at bottom
+3. **Edge Detail Enhancement**: Organic details like drips, tendrils, and ink spots are added to the edges
+
+4. **Composition Optimization**: The inkblot is centered in the canvas with appropriate margins
+
+The same Ethereum address will always produce the same inkblot pattern, making it suitable for NFT projects.
 
 ## Dependencies
 
@@ -100,3 +112,7 @@ Infinite Inkblots uses Perlin noise to create organic patterns with natural tran
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+Inspired by the classic Rorschach psychological test and the rich tradition of generative art.

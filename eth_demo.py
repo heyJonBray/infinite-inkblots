@@ -7,7 +7,7 @@ This showcases how different addresses produce different inkblots.
 import os
 import sys
 import argparse
-from rorschach.noise_rorschach import create_noise_rorschach
+from rorschach import create_inkblot
 
 # Sample Ethereum addresses (replace with real ones if needed)
 SAMPLE_ADDRESSES = [
@@ -18,7 +18,7 @@ SAMPLE_ADDRESSES = [
     "0x0000000000000000000000000000000000000000",  # Zero address
     "0xdead000000000000000000000000000000000000",  # "Dead" address
     "0xcafe00000000000000000000000000000000cafe",  # "Cafe" address
-    "0x88888888888888888888888888888888888888888", # Repeating 8s
+    "0x8888888888888888888888888888888888888888",  # Repeating 8s
     "0xabcdef0123456789abcdef0123456789abcdef01"   # Sequential
 ]
 
@@ -26,8 +26,9 @@ def main():
     parser = argparse.ArgumentParser(description='Generate multiple Rorschach inkblots from different Ethereum addresses')
     parser.add_argument('--size', type=int, default=800, help='Size of the output images in pixels (square)')
     parser.add_argument('--output-dir', type=str, default='out/eth_demo', help='Directory to save output images')
-    parser.add_argument('--vertical-fix', action='store_true', default=True, 
-                        help='Apply vertical adjustment to prevent banding at bottom')
+    parser.add_argument('--whitespace', type=float, default=0.15, help='Whitespace margin (0.0-0.3)')
+    parser.add_argument('--no-details', action='store_false', dest='render_details', help='Disable edge detail rendering')
+    parser.add_argument('--detail-intensity', type=float, default=0.7, help='Intensity of edge details (0.0-1.0)')
     args = parser.parse_args()
     
     # Create output directory
@@ -47,10 +48,12 @@ def main():
         print(f"Generating {output_file} from address: {address}")
         
         # Generate the inkblot
-        inkblot = create_noise_rorschach(
+        inkblot = create_inkblot(
             size=args.size,
-            vertical_fix=args.vertical_fix,
-            eth_address=address
+            eth_address=address,
+            render_details=args.render_details,
+            whitespace_margin=args.whitespace,
+            detail_intensity=args.detail_intensity
         )
         
         # Save the inkblot
