@@ -65,24 +65,8 @@ function extractEthFeatures(ethAddress) {
  * @returns {Object} Modified parameters
  */
 function customizeParamsFromEthFeatures(baseParams, ethFeatures) {
-  const modifiedParams = { ...baseParams };
-
-  // Adjust scale based on diversity - more diverse addresses get more detailed patterns
-  modifiedParams.scale = 0.005 + ethFeatures.diversity * 0.01;
-
-  // Adjust speed based on zeros
-  modifiedParams.speed = 0.003 + ethFeatures.zeros * 0.004;
-
-  // Adjust max particle radius based on high values
-  modifiedParams.maxRadius = 5 + ethFeatures.highValues * 10;
-
-  // Adjust particle count based on ones - constrained between 50-100
-  modifiedParams.particleCount = Math.floor(50 + ethFeatures.ones * 50);
-
-  // Adjust frames based on letters - constrained between 50-200
-  modifiedParams.framesToRender = Math.floor(50 + ethFeatures.letters * 150);
-
-  return modifiedParams;
+  // Return baseParams unchanged - no customization based on ETH features
+  return { ...baseParams };
 }
 
 module.exports = {

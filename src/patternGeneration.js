@@ -13,12 +13,12 @@ const { getColorSchemeFromEthFeatures } = require('./utils/colors');
 // Configuration parameters
 const params = {
   size: 1024, // Canvas size
-  particleCount: 125, // Particles per frame
-  framesToRender: 160, // Number of frames to simulate
+  particleCount: 90, // Particles per frame
+  framesToRender: 220, // Number of frames to simulate
   speed: 0.005, // Animation speed
   scale: 0.01, // Noise scale
-  maxRadius: 18, // Maximum particle radius
-  fadeAlpha: 5, // Fade-out alpha value (lower = more particle accumulation)
+  maxRadius: 8, // Maximum particle radius
+  fadeAlpha: 7, // Fade-out alpha value (lower = more particle accumulation)
   outputPath: './output', // Output directory
   horizontalMargin: 0.1, // 10% margin on left/right
   verticalMargin: 0.2, // 20% margin on top/bottom
@@ -482,13 +482,7 @@ function main() {
           trait_type: 'ColorScheme',
           value: colorScheme.is420Address
             ? '420 Special'
-            : ethFeatures.diversity > 0.7
-            ? 'Vibrant'
-            : ethFeatures.letters > 0.6
-            ? 'Blues'
-            : ethFeatures.zeros > 0.3
-            ? 'Monochrome'
-            : 'Classic',
+            : colorScheme.colorPairName,
         },
         {
           trait_type: 'PrimaryColor',
@@ -500,12 +494,7 @@ function main() {
         },
         {
           trait_type: 'Complexity',
-          value:
-            ethFeatures.diversity > 0.6
-              ? 'High'
-              : ethFeatures.diversity > 0.4
-              ? 'Medium'
-              : 'Low',
+          value: 'Medium',
         },
       ],
     };
