@@ -59,13 +59,13 @@ function getColorSchemeFromEthFeatures(ethFeatures) {
     secondaryColor = COLORS.GOLDENROD;
     colors = [
       white,
-      createColorString(secondaryColor),
-      white,
+      black,
       createColorString(primaryColor),
-      white,
+      createColorString(primaryColor),
+      createColorString(secondaryColor),
       black,
-      white,
-      black,
+      createColorString(primaryColor),
+      createColorString(primaryColor),
       createColorString(secondaryColor),
       white,
     ];
@@ -77,13 +77,13 @@ function getColorSchemeFromEthFeatures(ethFeatures) {
     // Default color scheme
     colors = [
       white,
-      white,
       createColorString(primaryColor),
-      white,
-      createColorString(primaryColor),
-      white,
       black,
-      white,
+      createColorString(secondaryColor),
+      createColorString(primaryColor),
+      createColorString(primaryColor),
+      black,
+      createColorString(primaryColor),
       black,
       white,
     ];
@@ -93,38 +93,41 @@ function getColorSchemeFromEthFeatures(ethFeatures) {
       // High diversity - more color variation
       colors = [
         white,
-        createColorString(secondaryColor),
+        createColorString(primaryColor),
         white,
         createColorString(primaryColor),
         white,
-        black,
-        white,
-        black,
         createColorString(secondaryColor),
+        white,
+        createColorString(primaryColor),
+        black,
         white,
       ];
     } else if (ethFeatures.letters > 0.6) {
-      // Many letters - blue dominant
+      // Blues scheme
       colors = [
         white,
-        white,
         createColorString(primaryColor),
-        white,
+        createColorString(primaryColor),
+        createColorString(primaryColor),
+        createColorString(secondaryColor),
+        createColorString(primaryColor),
         createColorString(primaryColor),
         createColorString(primaryColor),
         black,
-        white,
         white,
       ];
     } else if (ethFeatures.zeros > 0.3) {
-      // Many zeros - high contrast
+      // Monochrome scheme
       colors = [
         white,
+        black,
         createColorString(primaryColor),
         black,
-        white,
-        createColorString(secondaryColor),
-        white,
+        black,
+        createColorString(primaryColor),
+        createColorString(primaryColor),
+        black,
         black,
         white,
       ];

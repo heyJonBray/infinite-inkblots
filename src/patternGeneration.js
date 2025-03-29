@@ -13,12 +13,12 @@ const { getColorSchemeFromEthFeatures } = require('./utils/colors');
 // Configuration parameters
 const params = {
   size: 1024, // Canvas size
-  particleCount: 100, // Particles per frame
-  framesToRender: 300, // Number of frames to simulate
+  particleCount: 125, // Particles per frame
+  framesToRender: 160, // Number of frames to simulate
   speed: 0.005, // Animation speed
   scale: 0.01, // Noise scale
-  maxRadius: 12, // Maximum particle radius
-  fadeAlpha: 8, // Fade-out alpha value (lower = more particle accumulation)
+  maxRadius: 18, // Maximum particle radius
+  fadeAlpha: 5, // Fade-out alpha value (lower = more particle accumulation)
   outputPath: './output', // Output directory
   horizontalMargin: 0.1, // 10% margin on left/right
   verticalMargin: 0.2, // 20% margin on top/bottom
@@ -143,12 +143,17 @@ function createNoiseFunction(seededRandom) {
  */
 function getPlotter(value, colors, maxRadius) {
   const n = colors.length;
+
+  // Use a non-linear mapping to better distribute colors
+  // This will make middle colors more likely to appear
+  const mappedValue = Math.pow(value, 1.5); // Adjust this power to control distribution
+
   // Size of an interval
   const size = 1 / n;
   // Corresponding color index for the current value
-  const index = Math.floor(value / size);
+  const index = Math.floor(mappedValue * n);
   // Corresponding [0,1] in the current color interval
-  const valueInInterval = (value - index * size) / size;
+  const valueInInterval = (mappedValue * n) % 1;
 
   // To get the radius, with fading ones on color transition
   const center = 0.5;
@@ -191,22 +196,24 @@ function createSymmetricalParticle(seededRandom, size) {
     x = seededRandom() * (usableWidth / 2) + size * params.horizontalMargin;
     y = seededRandom() * usableHeight + size * params.verticalMargin;
 
-    // Calculate distance from center as a normalized value (0 to 1)
+    // Calculate distance from center as normalized values (0 to 1)
     const centerX = size / 2;
     const centerY = size / 2;
 
-    // Normalized distance from center (0 = center, 1 = furthest corner)
-    const dx = (x - centerX) / (size / 2);
-    const dy = (y - centerY) / (size / 2);
+    // Normalized distances from center (0 = center, 1 = furthest edge)
+    const dx = Math.abs(x - centerX) / (size / 2);
+    const dy = Math.abs(y - centerY) / (size / 2);
 
-    // Distance from center (0 to 1)
-    const distFromCenter = Math.sqrt(dx * dx + dy * dy);
+    // Weight the distances differently
+    // Higher weight for horizontal distance (more spread out)
+    // Lower weight for vertical distance (tighter distribution)
+    const weightedDist = dx * 0.7 + dy * 0.3;
 
     // Acceptance probability: higher near center, lower near edges
-    // Adjust the exponent (3) to control how quickly probability drops off
-    const acceptanceProbability = Math.pow(1 - distFromCenter, 3);
+    // Using a higher exponent (4) for more dramatic falloff
+    const acceptanceProbability = Math.pow(1 - weightedDist, 4);
 
-    // Accept the particle based on its distance from center
+    // Accept the particle based on its weighted distance from center
     if (seededRandom() < acceptanceProbability || attempts > 10) {
       break;
     }
@@ -263,10 +270,10 @@ function generateParticleRorschach(ethAddress, customParams = {}) {
   } else {
     // Use default features for non-ETH case
     ethFeatures = {
-      diversity: 0.5,
-      zeros: 0.5,
-      ones: 0.5,
-      letters: 0.5,
+      diversity: 0.5, // High diversity to trigger color variation
+      zeros: 0.4, // Low zeros to avoid monochrome
+      ones: 0.3, // Low ones to avoid monochrome
+      letters: 0.7, // High letters to trigger blues scheme
       highValues: 0.5,
       evenChars: 0.5,
       seed: Math.floor(Math.random() * 100000),
@@ -384,6 +391,7 @@ function parseArgs() {
     ethAddress: null,
     size: params.size,
     outputPath: params.outputPath,
+    isTest: false,
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -395,6 +403,8 @@ function parseArgs() {
       result.size = parseInt(args[++i], 10);
     } else if (arg === '--outputPath' && i + 1 < args.length) {
       result.outputPath = args[++i];
+    } else if (arg === '--test') {
+      result.isTest = true;
     }
   }
 
@@ -408,6 +418,11 @@ function main() {
   // Parse command line arguments
   const args = parseArgs();
 
+  // Set output path for test mode
+  if (args.isTest && !args.outputPath) {
+    args.outputPath = './output';
+  }
+
   // Ensure output directories exist
   const outputDir = args.outputPath || './output';
   const metadataDir = `${outputDir}/metadata`;
@@ -419,17 +434,20 @@ function main() {
     fs.mkdirSync(metadataDir, { recursive: true });
   }
 
-  // Generate output filename
-  const outputFilename = args.ethAddress
+  // Generate output filename - always use test.png for test mode
+  const outputFilename = args.isTest
+    ? 'test.png'
+    : args.ethAddress
     ? `particle_ror_${args.ethAddress.slice(0, 10)}.png`
     : `particle_ror_${Date.now()}.png`;
-  // TODO: Uncomment this when ready to save to output directory
-  // const outputPath = `${outputDir}/${outputFilename}`;
-  const outputPath = `./output/test.png`;
+  const outputPath = `${outputDir}/${outputFilename}`;
 
   console.log(`Generating particle-based Rorschach inkblot...`);
   console.log(`- Size: ${args.size}x${args.size}`);
   console.log(`- Output: ${outputPath}`);
+  if (args.isTest) {
+    console.log('- Test mode: Using default parameters');
+  }
 
   // Generate the inkblot
   const imageBuffer = generateParticleRorschach(args.ethAddress, {
