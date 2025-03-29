@@ -9,207 +9,155 @@ const COLORS = {
     rgb: [0, 0, 0],
   },
   // 420 Special colors
-  EMERALD_GREEN: {
-    name: 'Emerald Green',
-    rgb: [46, 130, 24],
+  EMERALD: {
+    name: 'Emerald',
+    rgb: [0, 106, 58],
   },
-  OLIVE_GREEN: {
-    name: 'Olive Green',
-    rgb: [113, 146, 26],
+  JADE: {
+    name: 'Jade',
+    rgb: [68, 156, 116],
   },
   // Other color pairs
   NAVY_BLUE: {
     name: 'Navy Blue',
-    rgb: [26, 55, 102],
-  },
-  PERIWINKLE: {
-    name: 'Periwinkle',
-    rgb: [129, 118, 183],
-  },
-  AMBER: {
-    name: 'Amber',
-    rgb: [190, 145, 59],
-  },
-  SUNSET_ORANGE: {
-    name: 'Sunset Orange',
-    rgb: [224, 154, 100],
-  },
-  BRICK_RED: {
-    name: 'Brick Red',
-    rgb: [158, 30, 30],
-  },
-  BURGUNDY: {
-    name: 'Burgundy',
-    rgb: [78, 0, 0],
-  },
-  RASPBERRY: {
-    name: 'Raspberry',
-    rgb: [152, 48, 107],
-  },
-  ORCHID: {
-    name: 'Orchid',
-    rgb: [180, 81, 137],
-  },
-  PALE_YELLOW: {
-    name: 'Pale Yellow',
-    rgb: [255, 241, 158],
-  },
-  MOSS_GREEN: {
-    name: 'Moss Green',
-    rgb: [176, 158, 54],
-  },
-  CARAMEL: {
-    name: 'Caramel',
-    rgb: [216, 153, 100],
-  },
-  PALE_PINK: {
-    name: 'Pale Pink',
-    rgb: [255, 197, 197],
+    rgb: [52, 68, 121],
   },
   SLATE_BLUE: {
     name: 'Slate Blue',
-    rgb: [113, 131, 171],
+    rgb: [86, 97, 134],
+  },
+  GOLD: {
+    name: 'Gold',
+    rgb: [153, 119, 0],
+  },
+  DEEP_BROWN: {
+    name: 'Deep Brown',
+    rgb: [84, 65, 0],
+  },
+  MAGENTA: {
+    name: 'Magenta',
+    rgb: [96, 0, 60],
+  },
+  RASPBERRY: {
+    name: 'Raspberry',
+    rgb: [115, 22, 80],
   },
   TEAL: {
     name: 'Teal',
-    rgb: [60, 130, 130],
+    rgb: [31, 145, 90],
   },
-  MIDNIGHT_BLUE: {
-    name: 'Midnight Blue',
-    rgb: [4, 5, 60],
-  },
-  COBALT: {
-    name: 'Cobalt',
-    rgb: [22, 69, 102],
-  },
-  LAVENDER: {
-    name: 'Lavender',
-    rgb: [173, 139, 220],
-  },
-  ROYAL_BLUE: {
-    name: 'Royal Blue',
-    rgb: [56, 59, 187],
-  },
-  CORAL_PINK: {
-    name: 'Coral Pink',
-    rgb: [212, 74, 113],
-  },
-  PEACH: {
-    name: 'Peach',
-    rgb: [255, 189, 135],
-  },
-  LIME_GREEN: {
-    name: 'Lime Green',
-    rgb: [115, 195, 28],
-  },
-  FOREST_GREEN: {
-    name: 'Forest Green',
-    rgb: [7, 119, 59],
+  GOLDEN_OLIVE: {
+    name: 'Golden Olive',
+    rgb: [175, 138, 12],
   },
   COPPER: {
     name: 'Copper',
-    rgb: [177, 125, 77],
+    rgb: [113, 68, 45],
   },
-  BROWN: {
-    name: 'Brown',
-    rgb: [91, 44, 1],
+  COPPER_REPEAT: {
+    // Note: same value as above, potential typo in request
+    name: 'Copper Repeat',
+    rgb: [113, 68, 45],
   },
-  DARK_NAVY: {
-    name: 'Dark Navy',
-    rgb: [32, 54, 94],
+  DEEP_PURPLE: {
+    name: 'Deep Purple',
+    rgb: [78, 1, 78],
   },
-  STEEL_BLUE: {
-    name: 'Steel Blue',
-    rgb: [58, 79, 118],
+  ORCHID: {
+    name: 'Orchid',
+    rgb: [128, 81, 128],
   },
-  PLUM: {
-    name: 'Plum',
-    rgb: [124, 56, 118],
+  CRIMSON: {
+    name: 'Crimson',
+    rgb: [115, 1, 14],
   },
-  MAUVE: {
-    name: 'Mauve',
-    rgb: [151, 96, 146],
+  BURGUNDY: {
+    name: 'Burgundy',
+    rgb: [58, 0, 7],
+  },
+  ROYAL_BLUE: {
+    name: 'Royal Blue',
+    rgb: [10, 36, 122],
+  },
+  PERIWINKLE: {
+    name: 'Periwinkle',
+    rgb: [59, 80, 149],
+  },
+  DARK_RED: {
+    name: 'Dark Red',
+    rgb: [62, 0, 0],
+  },
+  BRIGHT_RED: {
+    name: 'Bright Red',
+    rgb: [186, 11, 11],
+  },
+  AZURE: {
+    name: 'Azure',
+    rgb: [7, 118, 160],
+  },
+  TEAL_BLUE: {
+    name: 'Teal Blue',
+    rgb: [2, 106, 121],
   },
 };
 
-// Define color pairs with clear names based on the provided RGB values
 const COLOR_PAIRS = [
   // 420 Special pair (always first)
   {
     name: '420 Special',
-    primary: COLORS.EMERALD_GREEN,
-    secondary: COLORS.OLIVE_GREEN,
+    primary: COLORS.EMERALD,
+    secondary: COLORS.JADE,
   },
   // Other pairs
   {
-    name: 'Navy & Periwinkle',
+    name: 'Navy & Slate',
     primary: COLORS.NAVY_BLUE,
-    secondary: COLORS.PERIWINKLE,
+    secondary: COLORS.SLATE_BLUE,
   },
   {
-    name: 'Amber Sunset',
-    primary: COLORS.AMBER,
-    secondary: COLORS.SUNSET_ORANGE,
+    name: 'Golden Brown',
+    primary: COLORS.GOLD,
+    secondary: COLORS.DEEP_BROWN,
   },
   {
-    name: 'Rich Reds',
-    primary: COLORS.BRICK_RED,
-    secondary: COLORS.BURGUNDY,
+    name: 'Magenta Burst',
+    primary: COLORS.MAGENTA,
+    secondary: COLORS.RASPBERRY,
   },
   {
-    name: 'Berry Burst',
-    primary: COLORS.RASPBERRY,
+    name: 'Teal & Gold',
+    primary: COLORS.TEAL,
+    secondary: COLORS.GOLDEN_OLIVE,
+  },
+  {
+    name: 'Copper Tone',
+    primary: COLORS.COPPER,
+    secondary: COLORS.COPPER_REPEAT,
+  },
+  {
+    name: 'Purple Haze',
+    primary: COLORS.DEEP_PURPLE,
     secondary: COLORS.ORCHID,
   },
   {
-    name: 'Sunlit Moss',
-    primary: COLORS.PALE_YELLOW,
-    secondary: COLORS.MOSS_GREEN,
+    name: 'Deep Red',
+    primary: COLORS.CRIMSON,
+    secondary: COLORS.BURGUNDY,
   },
   {
-    name: 'Warm Neutral',
-    primary: COLORS.CARAMEL,
-    secondary: COLORS.PALE_PINK,
+    name: 'Ocean Blue',
+    primary: COLORS.ROYAL_BLUE,
+    secondary: COLORS.PERIWINKLE,
+  },
+  {
+    name: 'Blood Red',
+    primary: COLORS.DARK_RED,
+    secondary: COLORS.BRIGHT_RED,
   },
   {
     name: 'Ocean Depths',
-    primary: COLORS.SLATE_BLUE,
-    secondary: COLORS.TEAL,
-  },
-  {
-    name: 'Deep Blue Sea',
-    primary: COLORS.MIDNIGHT_BLUE,
-    secondary: COLORS.COBALT,
-  },
-  {
-    name: 'Royal Lavender',
-    primary: COLORS.LAVENDER,
-    secondary: COLORS.ROYAL_BLUE,
-  },
-  {
-    name: 'Coral Sunset',
-    primary: COLORS.CORAL_PINK,
-    secondary: COLORS.PEACH,
-  },
-  {
-    name: 'Forest Lime',
-    primary: COLORS.LIME_GREEN,
-    secondary: COLORS.FOREST_GREEN,
-  },
-  {
-    name: 'Copper Earth',
-    primary: COLORS.COPPER,
-    secondary: COLORS.BROWN,
-  },
-  {
-    name: 'Steel Navy',
-    primary: COLORS.DARK_NAVY,
-    secondary: COLORS.STEEL_BLUE,
-  },
-  {
-    name: 'Plum Mauve',
-    primary: COLORS.PLUM,
-    secondary: COLORS.MAUVE,
+    primary: COLORS.AZURE,
+    secondary: COLORS.TEAL_BLUE,
   },
 ];
 
@@ -258,8 +206,8 @@ function generateColorScheme(pair, is420Special = false) {
     // Special pattern for 420 addresses
     return [
       white, // 0.0-0.1 noise range - minimal usage, background/edges
-      black, // 0.1-0.2 noise range - outlines and deep shadows
-      primary, // 0.2-0.3 noise range - primary color, inner details
+      secondary, // 0.1-0.2 noise range - outlines and deep shadows
+      black, // 0.2-0.3 noise range - primary color, inner details
       primary, // 0.3-0.4 noise range - primary color, major features
       secondary, // 0.4-0.5 noise range - secondary color, transition areas
       black, // 0.5-0.6 noise range - central shadows
@@ -272,14 +220,14 @@ function generateColorScheme(pair, is420Special = false) {
     // Default pattern for regular addresses
     return [
       white, // 0.0-0.1 noise range - minimal usage, background/edges
-      primary, // 0.1-0.2 noise range - primary color, main features
-      white, // 0.2-0.3 noise range - highlights
-      black, // 0.3-0.4 noise range - deep shadows
-      secondary, // 0.4-0.5 noise range - secondary color, major shapes
-      primary, // 0.5-0.6 noise range - primary color, central features
-      black, // 0.6-0.7 noise range - core shadows
-      secondary, // 0.7-0.8 noise range - secondary color, highlights
-      black, // 0.8-0.9 noise range - accent shadows, fine details
+      secondary, // 0.1-0.2 noise range - outlines and deep shadows
+      black, // 0.2-0.3 noise range - primary color, inner details
+      primary, // 0.3-0.4 noise range - primary color, major features
+      secondary, // 0.4-0.5 noise range - secondary color, transition areas
+      black, // 0.5-0.6 noise range - central shadows
+      primary, // 0.6-0.7 noise range - primary color, core details
+      primary, // 0.7-0.8 noise range - primary color, highlights
+      secondary, // 0.8-0.9 noise range - secondary color, accents
       white, // 0.9-1.0 noise range - minimal usage, highest noise values
     ];
   }

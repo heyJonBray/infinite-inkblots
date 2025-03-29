@@ -15,6 +15,7 @@ const SAMPLE_ADDRESSES = [
   '0x9e13480a81Af1Dea2f255761810Ef8d6CbF21735', // $ROR address
   '0x8888888888888888888888888888888888888888', // Repeating 8s
   '0xabcdef0123456789abcdef0123456789abcdef01', // Sequential
+  '0x7e2F9dd040cF7B41a1AF9e4A24A0EDB04093d420', // 420 special
 ];
 
 // Create output directories
