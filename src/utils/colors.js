@@ -8,137 +8,208 @@ const COLORS = {
     name: 'Black',
     rgb: [0, 0, 0],
   },
-  NAVY: {
+  // 420 Special colors
+  EMERALD_GREEN: {
+    name: 'Emerald Green',
+    rgb: [46, 130, 24],
+  },
+  OLIVE_GREEN: {
+    name: 'Olive Green',
+    rgb: [113, 146, 26],
+  },
+  // Other color pairs
+  NAVY_BLUE: {
     name: 'Navy Blue',
-    rgb: [28, 69, 113],
+    rgb: [26, 55, 102],
   },
-  LAVENDER: {
-    name: 'Lavender',
-    rgb: [101, 93, 143],
-  },
-  CRIMSON: {
-    name: 'Crimson',
-    rgb: [235, 23, 25],
-  },
-  FOREST_GREEN: {
-    name: 'Forest Green',
-    rgb: [34, 139, 34],
-  },
-  GOLDENROD: {
-    name: 'Goldenrod',
-    rgb: [218, 165, 32],
-  },
-  TEAL: {
-    name: 'Teal',
-    rgb: [0, 128, 128],
-  },
-  CORAL: {
-    name: 'Coral',
-    rgb: [255, 127, 80],
-  },
-  PURPLE: {
-    name: 'Purple',
-    rgb: [128, 0, 128],
+  PERIWINKLE: {
+    name: 'Periwinkle',
+    rgb: [129, 118, 183],
   },
   AMBER: {
     name: 'Amber',
-    rgb: [255, 191, 0],
+    rgb: [190, 145, 59],
   },
-  SLATE: {
-    name: 'Slate',
-    rgb: [112, 128, 144],
+  SUNSET_ORANGE: {
+    name: 'Sunset Orange',
+    rgb: [224, 154, 100],
   },
-  MAROON: {
-    name: 'Maroon',
-    rgb: [128, 0, 0],
+  BRICK_RED: {
+    name: 'Brick Red',
+    rgb: [158, 30, 30],
   },
-  OLIVE: {
-    name: 'Olive',
-    rgb: [128, 128, 0],
+  BURGUNDY: {
+    name: 'Burgundy',
+    rgb: [78, 0, 0],
   },
-  INDIGO: {
-    name: 'Indigo',
-    rgb: [75, 0, 130],
+  RASPBERRY: {
+    name: 'Raspberry',
+    rgb: [152, 48, 107],
   },
-  TURQUOISE: {
-    name: 'Turquoise',
-    rgb: [64, 224, 208],
+  ORCHID: {
+    name: 'Orchid',
+    rgb: [180, 81, 137],
   },
-  ROSE: {
-    name: 'Rose',
-    rgb: [255, 0, 127],
+  PALE_YELLOW: {
+    name: 'Pale Yellow',
+    rgb: [255, 241, 158],
   },
-  MINT: {
-    name: 'Mint',
-    rgb: [152, 255, 152],
+  MOSS_GREEN: {
+    name: 'Moss Green',
+    rgb: [176, 158, 54],
   },
-  SAPPHIRE: {
-    name: 'Sapphire',
-    rgb: [15, 82, 186],
+  CARAMEL: {
+    name: 'Caramel',
+    rgb: [216, 153, 100],
   },
-  RUST: {
-    name: 'Rust',
-    rgb: [183, 65, 14],
+  PALE_PINK: {
+    name: 'Pale Pink',
+    rgb: [255, 197, 197],
+  },
+  SLATE_BLUE: {
+    name: 'Slate Blue',
+    rgb: [113, 131, 171],
+  },
+  TEAL: {
+    name: 'Teal',
+    rgb: [60, 130, 130],
+  },
+  MIDNIGHT_BLUE: {
+    name: 'Midnight Blue',
+    rgb: [4, 5, 60],
+  },
+  COBALT: {
+    name: 'Cobalt',
+    rgb: [22, 69, 102],
+  },
+  LAVENDER: {
+    name: 'Lavender',
+    rgb: [173, 139, 220],
+  },
+  ROYAL_BLUE: {
+    name: 'Royal Blue',
+    rgb: [56, 59, 187],
+  },
+  CORAL_PINK: {
+    name: 'Coral Pink',
+    rgb: [212, 74, 113],
+  },
+  PEACH: {
+    name: 'Peach',
+    rgb: [255, 189, 135],
+  },
+  LIME_GREEN: {
+    name: 'Lime Green',
+    rgb: [115, 195, 28],
+  },
+  FOREST_GREEN: {
+    name: 'Forest Green',
+    rgb: [7, 119, 59],
+  },
+  COPPER: {
+    name: 'Copper',
+    rgb: [177, 125, 77],
+  },
+  BROWN: {
+    name: 'Brown',
+    rgb: [91, 44, 1],
+  },
+  DARK_NAVY: {
+    name: 'Dark Navy',
+    rgb: [32, 54, 94],
+  },
+  STEEL_BLUE: {
+    name: 'Steel Blue',
+    rgb: [58, 79, 118],
+  },
+  PLUM: {
+    name: 'Plum',
+    rgb: [124, 56, 118],
+  },
+  MAUVE: {
+    name: 'Mauve',
+    rgb: [151, 96, 146],
   },
 };
 
-// Define 10 distinct color pairs with clear names
+// Define color pairs with clear names based on the provided RGB values
 const COLOR_PAIRS = [
+  // 420 Special pair (always first)
   {
-    name: 'Ocean Deep',
-    primary: COLORS.NAVY,
+    name: '420 Special',
+    primary: COLORS.EMERALD_GREEN,
+    secondary: COLORS.OLIVE_GREEN,
+  },
+  // Other pairs
+  {
+    name: 'Navy & Periwinkle',
+    primary: COLORS.NAVY_BLUE,
+    secondary: COLORS.PERIWINKLE,
+  },
+  {
+    name: 'Amber Sunset',
+    primary: COLORS.AMBER,
+    secondary: COLORS.SUNSET_ORANGE,
+  },
+  {
+    name: 'Rich Reds',
+    primary: COLORS.BRICK_RED,
+    secondary: COLORS.BURGUNDY,
+  },
+  {
+    name: 'Berry Burst',
+    primary: COLORS.RASPBERRY,
+    secondary: COLORS.ORCHID,
+  },
+  {
+    name: 'Sunlit Moss',
+    primary: COLORS.PALE_YELLOW,
+    secondary: COLORS.MOSS_GREEN,
+  },
+  {
+    name: 'Warm Neutral',
+    primary: COLORS.CARAMEL,
+    secondary: COLORS.PALE_PINK,
+  },
+  {
+    name: 'Ocean Depths',
+    primary: COLORS.SLATE_BLUE,
     secondary: COLORS.TEAL,
   },
   {
-    name: 'Twilight Sky',
+    name: 'Deep Blue Sea',
+    primary: COLORS.MIDNIGHT_BLUE,
+    secondary: COLORS.COBALT,
+  },
+  {
+    name: 'Royal Lavender',
     primary: COLORS.LAVENDER,
-    secondary: COLORS.INDIGO,
+    secondary: COLORS.ROYAL_BLUE,
   },
   {
-    name: 'Fire & Ice',
-    primary: COLORS.CRIMSON,
-    secondary: COLORS.SLATE,
+    name: 'Coral Sunset',
+    primary: COLORS.CORAL_PINK,
+    secondary: COLORS.PEACH,
   },
   {
-    name: 'Forest Dawn',
-    primary: COLORS.FOREST_GREEN,
-    secondary: COLORS.AMBER,
+    name: 'Forest Lime',
+    primary: COLORS.LIME_GREEN,
+    secondary: COLORS.FOREST_GREEN,
   },
   {
-    name: 'Golden Sunset',
-    primary: COLORS.GOLDENROD,
-    secondary: COLORS.RUST,
+    name: 'Copper Earth',
+    primary: COLORS.COPPER,
+    secondary: COLORS.BROWN,
   },
   {
-    name: 'Royal Court',
-    primary: COLORS.PURPLE,
-    secondary: COLORS.GOLDENROD,
+    name: 'Steel Navy',
+    primary: COLORS.DARK_NAVY,
+    secondary: COLORS.STEEL_BLUE,
   },
   {
-    name: 'Coral Reef',
-    primary: COLORS.TEAL,
-    secondary: COLORS.CORAL,
-  },
-  {
-    name: 'Vintage Wine',
-    primary: COLORS.MAROON,
-    secondary: COLORS.OLIVE,
-  },
-  {
-    name: 'Spring Bloom',
-    primary: COLORS.MINT,
-    secondary: COLORS.ROSE,
-  },
-  {
-    name: 'Jewel Box',
-    primary: COLORS.SAPPHIRE,
-    secondary: COLORS.AMBER,
-  },
-  // Keep 420 Special as a bonus 11th pair
-  {
-    name: '420 Special',
-    primary: COLORS.FOREST_GREEN,
-    secondary: COLORS.GOLDENROD,
+    name: 'Plum Mauve',
+    primary: COLORS.PLUM,
+    secondary: COLORS.MAUVE,
   },
 ];
 
@@ -159,14 +230,15 @@ function createColorString(color, alpha = 150) {
  * @returns {Object} Selected color pair
  */
 function selectColorPair(ethFeatures) {
-  // Special case: 420 address gets its own special scheme
+  // Special case: 420 address gets the 420 Special pair
   if (ethFeatures.address && ethFeatures.address.includes('420')) {
-    return COLOR_PAIRS[10]; // The 420 Special pair
+    return COLOR_PAIRS[0]; // The 420 Special pair is first in the array
   }
 
   // Use the seed to deterministically select a color pair
-  // We'll use modulo 10 to get a number between 0-9
-  const pairIndex = ethFeatures.seed % 10;
+  // We'll use modulo (COLOR_PAIRS.length - 1) to exclude the 420 Special pair
+  // Then add 1 to skip the 420 Special pair (index 0)
+  const pairIndex = (ethFeatures.seed % (COLOR_PAIRS.length - 1)) + 1;
   return COLOR_PAIRS[pairIndex];
 }
 
