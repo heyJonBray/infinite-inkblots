@@ -2,10 +2,10 @@
   "dependencies": {
     "canvas": "^3.1.0"
   },
-  "name": "inkblots-nft",
-  "version": "1.0.0",
-  "description": "A generative art project that creates beautiful Rorschach-style inkblots from Ethereum addresses. Each address produces a unique, deterministic inkblot pattern that can be used as NFT art.",
-  "main": "eth_rorschach.js",
+  "name": "infinite-inkblots",
+  "version": "1.2.0",
+  "description": "A generative art project creates deterministic Rorschach-style inkblots from Ethereum addresses.",
+  "main": "patternGeneration.js",
   "directories": {
     "doc": "docs"
   },
