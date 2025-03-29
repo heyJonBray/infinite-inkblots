@@ -18,10 +18,10 @@ const params = {
   speed: 0.005, // Animation speed
   scale: 0.01, // Noise scale
   maxRadius: 8, // Maximum particle radius
-  fadeAlpha: 7, // Fade-out alpha value (lower = more particle accumulation)
+  fadeAlpha: 9, // Fade-out alpha value (lower = more particle accumulation)
   outputPath: './output', // Output directory
   horizontalMargin: 0.1, // 10% margin on left/right
-  verticalMargin: 0.2, // 20% margin on top/bottom
+  verticalMargin: 0.25, // 20% margin on top/bottom
 };
 
 /**
