@@ -32,19 +32,16 @@ npm install
 ### Basic Usage
 
 ```bash
-node eth_rorschach.js --ethAddress 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
+node patternGeneration.js --ethAddress 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
 ```
 
 ### Advanced Options
 
 ```bash
-node eth_rorschach.js \
+node patternGeneration.js \
   --ethAddress 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4 \
   --size 1200 \
-  --particleCount 2500 \
-  --runDuration 1000 \
-  --outputPath out/custom_name.png \
-  --saveMetadata
+  --outputPath out/custom_name.png
 ```
 
 When using `--saveMetadata`, the metadata JSON will be saved to `out/metadata/` directory.
@@ -54,11 +51,13 @@ When using `--saveMetadata`, the metadata JSON will be saved to `out/metadata/` 
 - `--ethAddress`: Ethereum address for deterministic generation
 - `--size`: Canvas size in pixels (default: 800)
 - `--outputPath`: Path for saving the output image
-- `--particleCount`: Number of particles per frame
-- `--runDuration`: Number of frames to generate
-- `--scale`: Noise scale (smaller = more detailed)
-- `--maxRadius`: Maximum particle radius
-- `--saveMetadata`: Flag to save NFT metadata
+
+The generator automatically determines optimal parameters based on the Ethereum address:
+
+- Particle count: 50-100 particles per frame
+- Frames to render: 50-200 frames
+- Color scheme: Based on address diversity and character distribution
+- Pattern detail: Based on address complexity
 
 ### Batch Generation
 
@@ -98,30 +97,17 @@ The generator automatically extracts traits for NFT metadata and saves them to `
   "image": "particle_ror_0x5B38Da6a701c568545dCfcB03FcB875f56beddC4.png",
   "attributes": [
     {
-      "trait_type": "ColorScheme",
-      "value": "Blues"
+      "trait_type": "Address",
+      "value": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4"
     },
     {
-      "trait_type": "ParticleDensity",
-      "value": "Medium"
-    },
-    {
-      "trait_type": "ParticleSize",
-      "value": "Medium"
-    },
-    {
-      "trait_type": "Complexity",
-      "value": "High"
+      "trait_type": "Size",
+      "value": "800x800"
     }
   ]
 }
+```
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- Particle distribution approach inspired by Nicolas Decoster's P5.js implementation
-- Built on the rich tradition of generative art and NFT collections
-```

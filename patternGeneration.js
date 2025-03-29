@@ -9,8 +9,8 @@ const crypto = require('crypto');
 // Configuration parameters
 const params = {
   size: 800, // Canvas size
-  particleCount: 50, // Particles per frame
-  framesToRender: 100, // Number of frames to simulate
+  particleCount: 30, // Particles per frame
+  framesToRender: 200, // Number of frames to simulate
   speed: 0.005, // Animation speed
   scale: 0.008, // Noise scale
   maxRadius: 8, // Maximum particle radius
@@ -100,11 +100,11 @@ function customizeParamsFromEthFeatures(baseParams, ethFeatures) {
   // Adjust max particle radius based on high values
   modifiedParams.maxRadius = 5 + ethFeatures.highValues * 10;
 
-  // Adjust particle count based on ones
-  modifiedParams.particleCount = Math.floor(1500 + ethFeatures.ones * 1500);
+  // Adjust particle count based on ones - constrained between 50-100
+  modifiedParams.particleCount = Math.floor(50 + ethFeatures.ones * 50);
 
-  // Adjust frames based on letters
-  modifiedParams.framesToRender = Math.floor(80 + ethFeatures.letters * 80);
+  // Adjust frames based on letters - constrained between 50-200
+  modifiedParams.framesToRender = Math.floor(50 + ethFeatures.letters * 150);
 
   return modifiedParams;
 }
@@ -124,22 +124,63 @@ function getColorSchemeFromEthFeatures(ethFeatures) {
 
   const white = createColor(255, 255, 255);
   const black = createColor(0, 0, 0, alpha);
-  const blue = createColor(28, 69, 113, alpha);
-  const red = createColor(235, 23, 25, alpha);
+  const primaryColor = createColor(28, 69, 113, alpha);
+  const secondaryColor = createColor(235, 23, 25, alpha);
 
-  // Default color scheme
-  let colors = [white, white, blue, white, blue, white, black, white, white];
+  // Default color scheme - added one more black entry
+  let colors = [
+    white,
+    white,
+    primaryColor,
+    white,
+    primaryColor,
+    white,
+    black,
+    white,
+    black,
+    white,
+  ];
 
   // Customize colors based on ETH features
   if (ethFeatures.diversity > 0.7) {
-    // High diversity - more color variation
-    colors = [white, red, white, blue, white, black, white, red, white];
+    // High diversity - more color variation - added one more black entry
+    colors = [
+      white,
+      secondaryColor,
+      white,
+      primaryColor,
+      white,
+      black,
+      white,
+      black,
+      secondaryColor,
+      white,
+    ];
   } else if (ethFeatures.letters > 0.6) {
-    // Many letters - blue dominant
-    colors = [white, white, blue, white, blue, blue, white, white, white];
+    // Many letters - blue dominant - added a black entry
+    colors = [
+      white,
+      white,
+      primaryColor,
+      white,
+      primaryColor,
+      primaryColor,
+      black,
+      white,
+      white,
+    ];
   } else if (ethFeatures.zeros > 0.3) {
-    // Many zeros - high contrast
-    colors = [white, white, black, white, black, white, white];
+    // Many zeros - high contrast - added more black entries
+    colors = [
+      white,
+      primaryColor,
+      black,
+      white,
+      secondaryColor,
+      white,
+      black,
+      white,
+    ];
   }
 
   return colors;

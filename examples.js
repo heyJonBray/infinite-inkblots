@@ -1,7 +1,7 @@
 // Examples script for Infinite Inkblots
 // Generates multiple examples from different Ethereum addresses
 
-const { EthereumRorschachGenerator } = require('./rorschach');
+const { generateParticleRorschach } = require('./patternGeneration');
 const fs = require('fs');
 
 // Sample Ethereum addresses for testing
@@ -16,14 +16,6 @@ const SAMPLE_ADDRESSES = [
   '0x8888888888888888888888888888888888888888', // Repeating 8s
   '0xabcdef0123456789abcdef0123456789abcdef01', // Sequential
 ];
-
-// Generator configuration
-const config = {
-  size: 800,
-  runDuration: 800, // Shorter for testing
-  particleCount: 2000,
-  saveMetadata: true,
-};
 
 // Create output directories
 const OUTPUT_DIR = 'out/examples';
@@ -51,13 +43,14 @@ async function generateExamples() {
 
     const outputPath = `${OUTPUT_DIR}/particle_ror_${address}.png`;
 
-    const generator = new EthereumRorschachGenerator({
-      ...config,
-      ethAddress: address,
+    // Generate the inkblot
+    const imageBuffer = generateParticleRorschach(address, {
+      size: 800,
       outputPath: outputPath,
     });
 
-    const traits = generator.generate();
+    // Save the image
+    fs.writeFileSync(outputPath, imageBuffer);
 
     // Save metadata
     const metadataPath = `${METADATA_DIR}/metadata_${address.substring(
@@ -69,10 +62,16 @@ async function generateExamples() {
       description:
         'A unique Rorschach-style inkblot generated from an Ethereum address',
       image: outputPath.split('/').pop(),
-      attributes: Object.entries(traits).map(([trait_type, value]) => ({
-        trait_type,
-        value,
-      })),
+      attributes: [
+        {
+          trait_type: 'Address',
+          value: address,
+        },
+        {
+          trait_type: 'Size',
+          value: '800x800',
+        },
+      ],
     };
 
     fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
