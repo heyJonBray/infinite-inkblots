@@ -1,0 +1,28 @@
+{
+  "dependencies": {
+    "canvas": "^3.1.0"
+  },
+  "name": "inkblots-nft",
+  "version": "1.0.0",
+  "description": "A generative art project that creates beautiful Rorschach-style inkblots from Ethereum addresses. Each address produces a unique, deterministic inkblot pattern that can be used as NFT art.",
+  "main": "eth_rorschach.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/heyJonBray/infinite-inkblots.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/heyJonBray/infinite-inkblots/issues"
+  },
+  "homepage": "https://github.com/heyJonBray/infinite-inkblots#readme"
+}
