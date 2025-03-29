@@ -13,15 +13,15 @@ const { getColorSchemeFromEthFeatures } = require('./utils/colors');
 // Configuration parameters
 const params = {
   size: 1024, // Canvas size
-  particleCount: 50, // Particles per frame
-  framesToRender: 200, // Number of frames to simulate
+  particleCount: 100, // Particles per frame
+  framesToRender: 300, // Number of frames to simulate
   speed: 0.005, // Animation speed
-  scale: 0.008, // Noise scale
-  maxRadius: 8, // Maximum particle radius
-  fadeAlpha: 5, // Fade-out alpha value (lower = more particle accumulation)
+  scale: 0.01, // Noise scale
+  maxRadius: 12, // Maximum particle radius
+  fadeAlpha: 8, // Fade-out alpha value (lower = more particle accumulation)
   outputPath: './output', // Output directory
-  horizontalMargin: 0.1, // 10% margin on left/right edges
-  verticalMargin: 0.15, // 15% margin on top/bottom edges
+  horizontalMargin: 0.1, // 10% margin on left/right
+  verticalMargin: 0.2, // 20% margin on top/bottom
 };
 
 /**
@@ -423,7 +423,9 @@ function main() {
   const outputFilename = args.ethAddress
     ? `particle_ror_${args.ethAddress.slice(0, 10)}.png`
     : `particle_ror_${Date.now()}.png`;
-  const outputPath = `${outputDir}/${outputFilename}`;
+  // TODO: Uncomment this when ready to save to output directory
+  // const outputPath = `${outputDir}/${outputFilename}`;
+  const outputPath = `./output/test.png`;
 
   console.log(`Generating particle-based Rorschach inkblot...`);
   console.log(`- Size: ${args.size}x${args.size}`);

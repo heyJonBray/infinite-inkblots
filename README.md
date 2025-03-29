@@ -32,13 +32,13 @@ npm install
 ### Basic Usage
 
 ```bash
-node patternGeneration.js --ethAddress 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
+npm run generate -- --ethAddress 0x7e2F9dd040cF7B41a1AF9e4A24A0EDB04093dDa1
 ```
 
 ### Advanced Options
 
 ```bash
-node patternGeneration.js \
+npm run generate -- \
   --ethAddress 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4 \
   --size 1200 \
   --outputPath output/custom_name.png

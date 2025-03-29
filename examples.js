@@ -6,13 +6,13 @@ const fs = require('fs');
 
 // Sample Ethereum addresses for testing
 const SAMPLE_ADDRESSES = [
-  '0x5B38Da6a701c568545dCfcB03FcB875f56beddC4', // Generic test address
-  '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B', // Vitalik Buterin's address
+  '0x5B38Da6a701c568545dCfcB03FcB875f56beddC4', // jonbray.eth
+  '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B', // vitalik.eth
   '0x1db3439a222c519ab44bb1144fc28167b4fa6ee6', // Maker DAO address
   '0x742d35Cc6634C0532925a3b844Bc454e4438f44e', // Uniswap address
   '0x0000000000000000000000000000000000000000', // Zero address
   '0xdead000000000000000000000000000000000000', // "Dead" address
-  '0xcafe00000000000000000000000000000000cafe', // "Cafe" address
+  '0x9e13480a81Af1Dea2f255761810Ef8d6CbF21735', // $ROR address
   '0x8888888888888888888888888888888888888888', // Repeating 8s
   '0xabcdef0123456789abcdef0123456789abcdef01', // Sequential
 ];
