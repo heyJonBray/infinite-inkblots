@@ -50,7 +50,7 @@ async function generateExamples() {
 
     // Generate the inkblot
     const imageBuffer = generateParticleRorschach(address, {
-      size: 800,
+      size: 1024,
       outputPath: outputPath,
     });
 

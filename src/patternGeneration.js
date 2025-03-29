@@ -17,8 +17,8 @@ const params = {
   framesToRender: 220, // Number of frames to simulate
   speed: 0.005, // Animation speed
   scale: 0.01, // Noise scale
-  maxRadius: 8.5, // Maximum particle radius
-  fadeAlpha: 10, // Fade-out alpha value (lower = more particle accumulation)
+  maxRadius: 10, // Maximum particle radius
+  fadeAlpha: 8, // Fade-out alpha value (lower = more particle accumulation)
   outputPath: './output', // Output directory
   horizontalMargin: 0.1, // 10% margin on left/right
   verticalMargin: 0.25, // 20% margin on top/bottom
@@ -155,13 +155,18 @@ function getPlotter(value, colors, maxRadius) {
   // Corresponding [0,1] in the current color interval
   const valueInInterval = (mappedValue * n) % 1;
 
-  // To get the radius, with fading ones on color transition
+  // Enhanced radius calculation with more variety
+  // Use a combination of noise-based variation and position-based scaling
   const center = 0.5;
   const radiusScale = 2 * (center - Math.abs(valueInInterval - center));
 
+  // Add some randomness to the radius while maintaining the overall structure
+  const noiseVariation = Math.pow(Math.sin(valueInInterval * Math.PI * 4), 2);
+  const enhancedRadiusScale = radiusScale * (0.7 + 0.3 * noiseVariation);
+
   return {
     color: colors[Math.min(index, colors.length - 1)],
-    radius: maxRadius * radiusScale,
+    radius: maxRadius * enhancedRadiusScale,
   };
 }
 
@@ -177,7 +182,7 @@ function fadeOut(ctx, size, alpha) {
 }
 
 /**
- * Create symmetrical particles (original and mirrored)
+ * Create symmetrical particles (original and mirrored) - original version
  * @param {Function} seededRandom - Seeded random function
  * @param {number} size - Canvas size
  * @returns {Object} Particle positions (original and mirrored)
@@ -231,6 +236,136 @@ function createSymmetricalParticle(seededRandom, size) {
 }
 
 /**
+ * Create symmetrical particles (original and mirrored) - inverted version
+ * Uses a circular boundary with organic falloff for a more splattered look
+ * @param {Function} seededRandom - Seeded random function
+ * @param {number} size - Canvas size
+ * @returns {Object} Particle positions (original and mirrored)
+ */
+function createInvertedSymmetricalParticle(seededRandom, size) {
+  // Calculate the usable area dimensions
+  const usableWidth = size * (1 - 2 * params.horizontalMargin);
+  const usableHeight = size * (1 - 2 * params.verticalMargin);
+
+  // Calculate the maximum radius for the circular boundary
+  // Use the smaller of width/2 or height/2 to ensure the circle fits
+  const maxRadius = Math.min(usableWidth, usableHeight) / 2;
+
+  // Keep trying until we get a valid particle
+  let attempts = 0;
+  let x, y;
+
+  do {
+    // Generate a point in the left half of the usable area
+    x = seededRandom() * (usableWidth / 2) + size * params.horizontalMargin;
+    y = seededRandom() * usableHeight + size * params.verticalMargin;
+
+    // Calculate distance from center as normalized values (0 to 1)
+    const centerX = size / 2;
+    const centerY = size / 2;
+
+    // Calculate distance from center
+    const dx = x - centerX;
+    const dy = y - centerY;
+    const distanceFromCenter = Math.sqrt(dx * dx + dy * dy) / maxRadius;
+
+    // Create a more organic boundary by combining linear and circular falloff
+    const linearFalloff = Math.pow(1 - distanceFromCenter, 4);
+    const circularFalloff = Math.pow(
+      1 - distanceFromCenter * distanceFromCenter,
+      2
+    );
+
+    // Weight the falloffs to create a natural transition
+    const acceptanceProbability = linearFalloff * 0.7 + circularFalloff * 0.3;
+
+    // Accept the particle based on its distance from center
+    if (seededRandom() < acceptanceProbability || attempts > 10) {
+      break;
+    }
+
+    attempts++;
+  } while (attempts <= 10); // Give up after 10 attempts to avoid infinite loops
+
+  // Create the mirrored point for perfect bilateral symmetry
+  const mirrorX = size - x;
+
+  return {
+    original: { x, y },
+    mirrored: { x: mirrorX, y },
+  };
+}
+
+/**
+ * Create symmetrical particles (original and mirrored) - star pattern for 420 addresses
+ * Uses radial distribution with angular variation for a leaf-like effect
+ * @param {Function} seededRandom - Seeded random function
+ * @param {number} size - Canvas size
+ * @returns {Object} Particle positions (original and mirrored)
+ */
+function createStarSymmetricalParticle(seededRandom, size) {
+  // Calculate the usable area dimensions
+  const usableWidth = size * (1 - 2 * params.horizontalMargin);
+  const usableHeight = size * (1 - 2 * params.verticalMargin);
+
+  // Calculate the maximum radius for the star pattern
+  const maxRadius = Math.min(usableWidth, usableHeight) / 2;
+
+  // Keep trying until we get a valid particle
+  let attempts = 0;
+  let x, y;
+
+  do {
+    // Generate a point in the left half of the usable area
+    x = seededRandom() * (usableWidth / 2) + size * params.horizontalMargin;
+    y = seededRandom() * usableHeight + size * params.verticalMargin;
+
+    // Calculate distance from center
+    const centerX = size / 2;
+    const centerY = size / 2;
+    const dx = x - centerX;
+    const dy = y - centerY;
+    const distanceFromCenter = Math.sqrt(dx * dx + dy * dy) / maxRadius;
+
+    // Calculate angle from center (in radians)
+    const angle = Math.atan2(dy, dx);
+
+    // Create leaf pattern by combining multiple components
+    const radialFalloff = Math.pow(1 - distanceFromCenter, 3);
+
+    // Create 3.5-pointed leaf pattern (7 points total when mirrored)
+    // Use different frequencies to create more organic variation
+    const mainPoints = Math.pow(Math.sin(angle * 3.5), 2); // Main 3.5 points per side
+    const subPoints = Math.pow(Math.sin(angle * 7), 2) * 0.5; // Sub-points for texture
+    const leafPattern = mainPoints * 0.7 + subPoints * 0.3;
+
+    // Add some asymmetry to make it more leaf-like
+    const asymmetry = Math.sin(angle * 1.75) * 0.2; // Creates slight asymmetry in the lobes
+
+    // Combine patterns with weights
+    const acceptanceProbability =
+      radialFalloff * 0.5 + // Base radial distribution
+      leafPattern * 0.4 + // Main leaf pattern
+      asymmetry * 0.1; // Asymmetry for organic feel
+
+    // Accept the particle based on the combined pattern
+    if (seededRandom() < acceptanceProbability || attempts > 10) {
+      break;
+    }
+
+    attempts++;
+  } while (attempts <= 10); // Give up after 10 attempts to avoid infinite loops
+
+  // Create the mirrored point for perfect bilateral symmetry
+  const mirrorX = size - x;
+
+  return {
+    original: { x, y },
+    mirrored: { x: mirrorX, y },
+  };
+}
+
+/**
  * Generate Rorschach inkblot using particle-based approach
  * @param {string} ethAddress - Ethereum address for seeding
  * @param {Object} customParams - Custom parameters
@@ -244,6 +379,8 @@ function generateParticleRorschach(ethAddress, customParams = {}) {
   let ethFeatures = null;
   let seededRandom = createSeededRandom();
   let colors;
+  let isInverted = false;
+  let is420Address = false;
 
   if (ethAddress) {
     ethFeatures = extractEthFeatures(ethAddress);
@@ -261,19 +398,27 @@ function generateParticleRorschach(ethAddress, customParams = {}) {
     // Initialize seeded random with ETH seed
     seededRandom = createSeededRandom(ethFeatures.seed);
 
+    // Determine pattern type based on address features
+    is420Address = ethAddress.toLowerCase().includes('420');
+    isInverted = !is420Address && ethFeatures.zeros > 0.5;
+
     console.log(`Using ETH features for address ${ethAddress}:`);
-    console.log(`- Diversity: ${ethFeatures.diversity.toFixed(2)}`);
     console.log(`- Scale: ${currentParams.scale.toFixed(4)}`);
     console.log(`- Particles: ${currentParams.particleCount}`);
     console.log(`- Frames: ${currentParams.framesToRender}`);
     console.log(`- Seed: ${ethFeatures.seed}`);
+    console.log(
+      `- Pattern: ${
+        is420Address ? 'Star' : isInverted ? 'Inverted' : 'Standard'
+      }`
+    );
   } else {
     // Use default features for non-ETH case
     ethFeatures = {
-      diversity: 0.5, // High diversity to trigger color variation
-      zeros: 0.4, // Low zeros to avoid monochrome
-      ones: 0.3, // Low ones to avoid monochrome
-      letters: 0.7, // High letters to trigger blues scheme
+      diversity: 0.5,
+      zeros: 0.4,
+      ones: 0.3,
+      letters: 0.7,
       highValues: 0.5,
       evenChars: 0.5,
       seed: Math.floor(Math.random() * 100000),
@@ -309,11 +454,18 @@ function generateParticleRorschach(ethAddress, customParams = {}) {
 
     // Generate particles for this frame
     for (let i = 0; i < currentParams.particleCount; i++) {
-      // Create symmetrical particles
-      const particles = createSymmetricalParticle(
-        seededRandom,
-        currentParams.size
-      );
+      // Create symmetrical particles using the appropriate function
+      let particles;
+      if (is420Address) {
+        particles = createStarSymmetricalParticle(
+          seededRandom,
+          currentParams.size
+        );
+      } else {
+        particles = isInverted
+          ? createInvertedSymmetricalParticle(seededRandom, currentParams.size)
+          : createSymmetricalParticle(seededRandom, currentParams.size);
+      }
 
       // Get plotter properties based on position and current frame - only calculate once
       // for the original particle, and use the same for the mirrored one
@@ -341,9 +493,20 @@ function generateParticleRorschach(ethAddress, customParams = {}) {
       );
 
       // Vary radius based on distance from center to create more organic edges
-      // Particles further from center get smaller
-      const sizeVariation = 1 - distanceFromCenter * 0.7;
-      const organicRadius = plotter.radius * sizeVariation;
+      // Enhanced edge variation with more small particles
+      const edgeFactor = Math.pow(distanceFromCenter, 2);
+      const sizeVariation = 1 - edgeFactor * 0.8; // Increased edge falloff
+
+      // Add some randomness to edge particles
+      const edgeNoise = Math.pow(Math.sin(distanceFromCenter * Math.PI * 8), 2);
+      const organicRadius =
+        plotter.radius * (sizeVariation * (0.6 + 0.4 * edgeNoise));
+
+      // Ensure minimum particle size for visual interest
+      const finalRadius = Math.max(
+        organicRadius,
+        currentParams.maxRadius * 0.1
+      );
 
       // Draw both particles with the same color and radius
       ctx.fillStyle = plotter.color;
@@ -353,7 +516,7 @@ function generateParticleRorschach(ethAddress, customParams = {}) {
       ctx.arc(
         particles.original.x,
         particles.original.y,
-        organicRadius,
+        finalRadius,
         0,
         2 * Math.PI
       );
@@ -364,7 +527,7 @@ function generateParticleRorschach(ethAddress, customParams = {}) {
       ctx.arc(
         particles.mirrored.x,
         particles.mirrored.y,
-        organicRadius,
+        finalRadius,
         0,
         2 * Math.PI
       );
@@ -464,6 +627,10 @@ function main() {
     const ethFeatures = extractEthFeatures(args.ethAddress);
     const colorScheme = getColorSchemeFromEthFeatures(ethFeatures);
 
+    // Determine pattern type based on address features
+    const is420Address = args.ethAddress.toLowerCase().includes('420');
+    const isInverted = !is420Address && ethFeatures.zeros > 0.5;
+
     const metadata = {
       name: `Infinite Inkblot ${args.ethAddress.slice(0, 10)}`,
       description:
@@ -495,6 +662,10 @@ function main() {
         {
           trait_type: 'Complexity',
           value: 'Medium',
+        },
+        {
+          trait_type: 'Pattern',
+          value: is420Address ? 'Star' : isInverted ? 'Inverted' : 'Standard',
         },
       ],
     };
