@@ -59,3 +59,14 @@ output/*.tiff
 .eslintcache
 .npm
 .DS_Store*
+
+# Ignore generated files in output directories
+output/examples/*.png
+output/examples/metadata/*.json
+
+# Keep directory structure
+!output/examples/.gitkeep
+!output/examples/metadata/.gitkeep
+
+# OS
+Thumbs.db

@@ -15,7 +15,7 @@ A generative art project that creates beautiful particle-based Rorschach-style i
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/infinite-inkblots.git
+git clone https://github.com/heyjonbray/infinite-inkblots.git
 cd infinite-inkblots
 
 # Install dependencies
@@ -44,7 +44,7 @@ node patternGeneration.js \
   --outputPath output/custom_name.png
 ```
 
-When using `--saveMetadata`, the metadata JSON will be saved to `output/metadata/` directory.
+The generator will automatically save metadata to `output/metadata/` directory.
 
 ### Parameters
 
@@ -67,6 +67,11 @@ To generate multiple examples from different Ethereum addresses:
 node examples.js
 ```
 
+This will generate:
+
+- Images in `output/examples/`
+- Metadata files in `output/examples/metadata/`
+
 ## How It Works
 
 Infinite Inkblots uses a particle-based animation approach to create Rorschach-like patterns:
@@ -88,7 +93,7 @@ Different Ethereum addresses produce distinctly different inkblots:
 
 ### NFT Integration
 
-The generator automatically extracts traits for NFT metadata and saves them to `out/metadata/`:
+The generator automatically extracts traits for NFT metadata and saves them to `output/metadata/`:
 
 ```json
 {

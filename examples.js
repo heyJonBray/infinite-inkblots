@@ -19,7 +19,7 @@ const SAMPLE_ADDRESSES = [
 
 // Create output directories
 const OUTPUT_DIR = 'output/examples';
-const METADATA_DIR = 'output/metadata';
+const METADATA_DIR = 'output/examples/metadata';
 
 if (!fs.existsSync(OUTPUT_DIR)) {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });

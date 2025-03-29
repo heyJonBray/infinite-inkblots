@@ -8,7 +8,7 @@ const crypto = require('crypto');
 
 // Configuration parameters
 const params = {
-  size: 800, // Canvas size
+  size: 1024, // Canvas size
   particleCount: 50, // Particles per frame
   framesToRender: 200, // Number of frames to simulate
   speed: 0.005, // Animation speed
@@ -41,6 +41,7 @@ function extractEthFeatures(ethAddress) {
       highValues: 0.5,
       evenChars: 0.5,
       seed: Math.floor(Math.random() * 100000),
+      address: ethAddress || '0x0000000000000000000000000000000000000000',
     };
   }
 
@@ -79,6 +80,7 @@ function extractEthFeatures(ethAddress) {
     highValues: highValues / cleanAddress.length,
     evenChars: evenChars / cleanAddress.length,
     seed: seed,
+    address: ethAddress,
   };
 }
 
@@ -112,7 +114,7 @@ function customizeParamsFromEthFeatures(baseParams, ethFeatures) {
 /**
  * Get color scheme based on Ethereum features
  * @param {Object} ethFeatures - Ethereum features
- * @returns {Array} Array of colors to use for the plotter
+ * @returns {Object} Object containing colors array and color information
  */
 function getColorSchemeFromEthFeatures(ethFeatures) {
   const alpha = 150; // Semi-transparent
@@ -124,26 +126,19 @@ function getColorSchemeFromEthFeatures(ethFeatures) {
 
   const white = createColor(255, 255, 255);
   const black = createColor(0, 0, 0, alpha);
-  const primaryColor = createColor(28, 69, 113, alpha);
-  const secondaryColor = createColor(235, 23, 25, alpha);
 
-  // Default color scheme - added one more black entry
-  let colors = [
-    white,
-    white,
-    primaryColor,
-    white,
-    primaryColor,
-    white,
-    black,
-    white,
-    black,
-    white,
-  ];
+  // Check if address starts or ends with 420
+  const is420Address =
+    ethFeatures.address &&
+    (ethFeatures.address.startsWith('0x420') ||
+      ethFeatures.address.endsWith('420'));
 
-  // Customize colors based on ETH features
-  if (ethFeatures.diversity > 0.7) {
-    // High diversity - more color variation - added one more black entry
+  let primaryColor, secondaryColor, colors;
+
+  // Special color scheme for 420 addresses
+  if (is420Address) {
+    primaryColor = createColor(34, 139, 34, alpha); // Forest green
+    secondaryColor = createColor(218, 165, 32, alpha); // Goldenrod
     colors = [
       white,
       secondaryColor,
@@ -156,34 +151,74 @@ function getColorSchemeFromEthFeatures(ethFeatures) {
       secondaryColor,
       white,
     ];
-  } else if (ethFeatures.letters > 0.6) {
-    // Many letters - blue dominant - added a black entry
+  } else {
+    // Default colors
+    primaryColor = createColor(28, 69, 113, alpha);
+    secondaryColor = createColor(235, 23, 25, alpha);
+
+    // Default color scheme
     colors = [
       white,
       white,
       primaryColor,
       white,
       primaryColor,
-      primaryColor,
+      white,
       black,
-      white,
-      white,
-    ];
-  } else if (ethFeatures.zeros > 0.3) {
-    // Many zeros - high contrast - added more black entries
-    colors = [
-      white,
-      primaryColor,
-      black,
-      white,
-      secondaryColor,
       white,
       black,
       white,
     ];
+
+    // Customize colors based on ETH features
+    if (ethFeatures.diversity > 0.7) {
+      // High diversity - more color variation
+      colors = [
+        white,
+        secondaryColor,
+        white,
+        primaryColor,
+        white,
+        black,
+        white,
+        black,
+        secondaryColor,
+        white,
+      ];
+    } else if (ethFeatures.letters > 0.6) {
+      // Many letters - blue dominant
+      colors = [
+        white,
+        white,
+        primaryColor,
+        white,
+        primaryColor,
+        primaryColor,
+        black,
+        white,
+        white,
+      ];
+    } else if (ethFeatures.zeros > 0.3) {
+      // Many zeros - high contrast
+      colors = [
+        white,
+        primaryColor,
+        black,
+        white,
+        secondaryColor,
+        white,
+        black,
+        white,
+      ];
+    }
   }
 
-  return colors;
+  return {
+    colors,
+    primaryColor,
+    secondaryColor,
+    is420Address,
+  };
 }
 
 /**
@@ -560,17 +595,22 @@ function main() {
   // Parse command line arguments
   const args = parseArgs();
 
-  // Ensure output directory exists
-  if (!fs.existsSync(args.outputPath)) {
-    fs.mkdirSync(args.outputPath, { recursive: true });
+  // Ensure output directories exist
+  const outputDir = args.outputPath || './output';
+  const metadataDir = `${outputDir}/metadata`;
+
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+  if (!fs.existsSync(metadataDir)) {
+    fs.mkdirSync(metadataDir, { recursive: true });
   }
 
   // Generate output filename
-  // const outputFilename = args.ethAddress
-  //   ? `particle_ror_${args.ethAddress.slice(0, 10)}.png`
-  //   : `particle_ror_${Date.now()}.png`;
-  const outputFilename = `test.png`;
-  const outputPath = `${args.outputPath}/${outputFilename}`;
+  const outputFilename = args.ethAddress
+    ? `particle_ror_${args.ethAddress.slice(0, 10)}.png`
+    : `particle_ror_${Date.now()}.png`;
+  const outputPath = `${outputDir}/${outputFilename}`;
 
   console.log(`Generating particle-based Rorschach inkblot...`);
   console.log(`- Size: ${args.size}x${args.size}`);
@@ -589,6 +629,8 @@ function main() {
   // Generate metadata if ETH address was provided
   if (args.ethAddress) {
     const ethFeatures = extractEthFeatures(args.ethAddress);
+    const colorScheme = getColorSchemeFromEthFeatures(ethFeatures);
+
     const metadata = {
       name: `Infinite Inkblot ${args.ethAddress.slice(0, 10)}`,
       description:
@@ -596,15 +638,32 @@ function main() {
       image: outputFilename,
       attributes: [
         {
+          trait_type: 'Address',
+          value: args.ethAddress,
+        },
+        {
+          trait_type: 'Size',
+          value: `${args.size}x${args.size}`,
+        },
+        {
           trait_type: 'ColorScheme',
-          value:
-            ethFeatures.diversity > 0.7
-              ? 'Vibrant'
-              : ethFeatures.letters > 0.6
-              ? 'Blues'
-              : ethFeatures.zeros > 0.3
-              ? 'Monochrome'
-              : 'Classic',
+          value: colorScheme.is420Address
+            ? '420 Special'
+            : ethFeatures.diversity > 0.7
+            ? 'Vibrant'
+            : ethFeatures.letters > 0.6
+            ? 'Blues'
+            : ethFeatures.zeros > 0.3
+            ? 'Monochrome'
+            : 'Classic',
+        },
+        {
+          trait_type: 'PrimaryColor',
+          value: colorScheme.primaryColor,
+        },
+        {
+          trait_type: 'SecondaryColor',
+          value: colorScheme.secondaryColor,
         },
         {
           trait_type: 'Complexity',
@@ -615,20 +674,12 @@ function main() {
               ? 'Medium'
               : 'Low',
         },
-        {
-          trait_type: 'ParticleCount',
-          value: params.particleCount * params.framesToRender,
-        },
-        {
-          trait_type: 'Size',
-          value: `${args.size}x${args.size}`,
-        },
       ],
     };
 
-    const metadataPath = `${args.outputPath}/metadata_${args.ethAddress.slice(
+    const metadataPath = `${metadataDir}/metadata_${args.ethAddress.slice(
       0,
-      10
+      8
     )}.json`;
     fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
     console.log(`Metadata saved to ${metadataPath}`);
