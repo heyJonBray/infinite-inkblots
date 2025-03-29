@@ -10,10 +10,8 @@ build/
 
 # Environment variables
 .env
-.env.local
-.env.development
-.env.test
-.env.production
+.env.*
+!.env.sample
 
 # Debug logs
 npm-debug.log*
@@ -36,16 +34,7 @@ coverage/
 .DS_Store
 
 # Generated Rorschach images and metadata
-output/*.jpg
-output/*.jpeg
-output/*.png
-output/*.gif
-output/*.bmp
-output/*.tiff
-output/*.json
-output/examples/*.png
-output/examples/metadata/*.json
-output/metadata/*.json
+output/**
 
 # Keep only example files
 !output/**/example-*.*
