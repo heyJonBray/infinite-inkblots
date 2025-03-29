@@ -7,7 +7,6 @@ yarn.lock
 dist/
 build/
 .next/
-output/
 
 # Environment variables
 .env
@@ -36,20 +35,20 @@ coverage/
 *~
 .DS_Store
 
-# Generated Rorschach images
+# Generated Rorschach images and metadata
 output/*.jpg
 output/*.jpeg
 output/*.png
 output/*.gif
 output/*.bmp
 output/*.tiff
+output/*.json
+output/examples/*.png
+output/examples/metadata/*.json
+output/metadata/*.json
 
-# Keep the out directory itself
-!output/.gitkeep
-!output/metadata/.gitkeep
-
-# except for the example image
-!output/example.png
+# Keep only example files
+!output/**/example-*.*
 
 # Misc
 .cache/
@@ -59,14 +58,6 @@ output/*.tiff
 .eslintcache
 .npm
 .DS_Store*
-
-# Ignore generated files in output directories
-output/examples/*.png
-output/examples/metadata/*.json
-
-# Keep directory structure
-!output/examples/.gitkeep
-!output/examples/metadata/.gitkeep
 
 # OS
 Thumbs.db
