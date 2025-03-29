@@ -116,3 +116,7 @@ The generator automatically extracts traits for NFT metadata and saves them to `
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+### TODO
+
+- [ ] rename the color pairs

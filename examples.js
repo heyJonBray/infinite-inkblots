@@ -1,7 +1,11 @@
 // Examples script for Infinite Inkblots
 // Generates multiple examples from different Ethereum addresses
 
-const { generateParticleRorschach } = require('./src/patternGeneration');
+const {
+  generateParticleRorschach,
+  extractEthFeatures,
+} = require('./src/patternGeneration');
+const { getColorSchemeFromEthFeatures } = require('./src/utils/colors');
 const fs = require('fs');
 
 // Sample Ethereum addresses for testing
@@ -11,7 +15,7 @@ const SAMPLE_ADDRESSES = [
   '0x1db3439a222c519ab44bb1144fc28167b4fa6ee6', // Maker DAO address
   '0x742d35Cc6634C0532925a3b844Bc454e4438f44e', // Uniswap address
   '0x0000000000000000000000000000000000000000', // Zero address
-  '0xdead000000000000000000000000000000000000', // "Dead" address
+  '0x000000000000000000000000000000000000dead', // "Dead" address
   '0x9e13480a81Af1Dea2f255761810Ef8d6CbF21735', // $ROR address
   '0x8888888888888888888888888888888888888888', // Repeating 8s
   '0xabcdef0123456789abcdef0123456789abcdef01', // Sequential
@@ -53,13 +57,17 @@ async function generateExamples() {
     // Save the image
     fs.writeFileSync(outputPath, imageBuffer);
 
+    // Extract features and get color scheme
+    const ethFeatures = extractEthFeatures(address);
+    const colorScheme = getColorSchemeFromEthFeatures(ethFeatures);
+
     // Save metadata
     const metadataPath = `${METADATA_DIR}/metadata_${address.substring(
       0,
       8
     )}.json`;
     const metadata = {
-      name: `Infinite Inkblot #${i + 1}`,
+      name: `Infinite Inkblot ${address.slice(0, 10)}`,
       description:
         'A unique Rorschach-style inkblot generated from an Ethereum address',
       image: outputPath.split('/').pop(),
@@ -71,6 +79,24 @@ async function generateExamples() {
         {
           trait_type: 'Size',
           value: '800x800',
+        },
+        {
+          trait_type: 'ColorScheme',
+          value: colorScheme.is420Address
+            ? '420 Special'
+            : colorScheme.colorPairName,
+        },
+        {
+          trait_type: 'PrimaryColor',
+          value: colorScheme.primaryColor,
+        },
+        {
+          trait_type: 'SecondaryColor',
+          value: colorScheme.secondaryColor,
+        },
+        {
+          trait_type: 'Complexity',
+          value: 'Medium',
         },
       ],
     };

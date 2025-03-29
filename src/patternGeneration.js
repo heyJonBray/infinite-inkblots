@@ -17,8 +17,8 @@ const params = {
   framesToRender: 220, // Number of frames to simulate
   speed: 0.005, // Animation speed
   scale: 0.01, // Noise scale
-  maxRadius: 8, // Maximum particle radius
-  fadeAlpha: 9, // Fade-out alpha value (lower = more particle accumulation)
+  maxRadius: 8.5, // Maximum particle radius
+  fadeAlpha: 10, // Fade-out alpha value (lower = more particle accumulation)
   outputPath: './output', // Output directory
   horizontalMargin: 0.1, // 10% margin on left/right
   verticalMargin: 0.25, // 20% margin on top/bottom
