@@ -9,7 +9,7 @@ const crypto = require('crypto');
 // Configuration parameters
 const params = {
   size: 800, // Canvas size
-  particleCount: 30, // Particles per frame
+  particleCount: 50, // Particles per frame
   framesToRender: 200, // Number of frames to simulate
   speed: 0.005, // Animation speed
   scale: 0.008, // Noise scale

@@ -41,10 +41,10 @@ node patternGeneration.js --ethAddress 0x5B38Da6a701c568545dCfcB03FcB875f56beddC
 node patternGeneration.js \
   --ethAddress 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4 \
   --size 1200 \
-  --outputPath out/custom_name.png
+  --outputPath output/custom_name.png
 ```
 
-When using `--saveMetadata`, the metadata JSON will be saved to `out/metadata/` directory.
+When using `--saveMetadata`, the metadata JSON will be saved to `output/metadata/` directory.
 
 ### Parameters
 
