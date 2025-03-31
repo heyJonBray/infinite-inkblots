@@ -253,30 +253,30 @@ function generateColorScheme(pair, is420Special = false, isLessUnique = false) {
   } else if (isLessUnique) {
     // monochrome/sepia pattern for less unique addresses
     return [
-      black, // 0.0-0.1 noise range - minimal usage, background/edges
-      secondary, // 0.1-0.2 noise range - outlines and deep shadows
-      secondary, // 0.2-0.3 noise range - grey/sepia color, inner details
-      primary, // 0.3-0.4 noise range - grey/sepia color, major features
-      black, // 0.4-0.5 noise range - grey/sepia color, transition areas
-      secondary, // 0.5-0.6 noise range - grey/sepia color, central shadows
-      primary, // 0.6-0.7 noise range - grey/sepia color, core details
-      black, // 0.7-0.8 noise range - grey/sepia color, highlights
-      secondary, // 0.8-0.9 noise range - grey/sepia color, accents
-      white, // 0.9-1.0 noise range - minimal usage, highest noise values
+      black, // minimal usage, background/edges
+      secondary, // outlines and deep shadows
+      primary, // inner details
+      secondary, // major features
+      black, // transition areas
+      primary, // central shadows
+      secondary, // core details
+      black, // highlights
+      secondary, // accents
+      white, // highest noise values
     ];
   } else {
     // default pattern
     return [
-      secondary, // 0.0-0.1 noise range - minimal usage, background/edges
-      black, // 0.1-0.2 noise range - outlines and deep shadows
-      black, // 0.2-0.3 noise range - primary color, inner details
-      primary, // 0.3-0.4 noise range - primary color, major features
-      secondary, // 0.4-0.5 noise range - secondary color, transition areas
-      white, // 0.5-0.6 noise range - central shadows
-      primary, // 0.6-0.7 noise range - primary color, core details
-      primary, // 0.7-0.8 noise range - primary color, highlights
-      secondary, // 0.8-0.9 noise range - secondary color, accents
-      white, // 0.9-1.0 noise range - minimal usage, highest noise values
+      secondary, // background/edges
+      black, // outlines and deep shadows
+      black, // inner details
+      primary, // major features
+      secondary, // transition areas
+      white, // central shadows
+      primary, // core details
+      primary, // highlights
+      secondary, // accents
+      white, // highest noise values
     ];
   }
 }
