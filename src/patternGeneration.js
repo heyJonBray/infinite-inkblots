@@ -544,148 +544,17 @@ function generateParticleRorschach(ethAddress, customParams = {}) {
   return canvas.toBuffer('image/png');
 }
 
-/**
- * Parse command line arguments
- * @returns {Object} Parsed arguments
- */
-function parseArgs() {
-  const args = process.argv.slice(2);
-  const result = {
-    ethAddress: null,
-    size: params.size,
-    outputPath: params.outputPath,
-    isTest: false,
-  };
-
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
-
-    if (arg === '--ethAddress' && i + 1 < args.length) {
-      result.ethAddress = args[++i];
-    } else if (arg === '--size' && i + 1 < args.length) {
-      result.size = parseInt(args[++i], 10);
-    } else if (arg === '--outputPath' && i + 1 < args.length) {
-      result.outputPath = args[++i];
-    } else if (arg === '--test') {
-      result.isTest = true;
-    }
-  }
-
-  return result;
-}
-
-/**
- * Main function
- */
-function main() {
-  // Parse command line arguments
-  const args = parseArgs();
-
-  // Set output path for test mode
-  if (args.isTest && !args.outputPath) {
-    args.outputPath = './output';
-  }
-
-  // Ensure output directories exist
-  const outputDir = args.outputPath || './output';
-  const metadataDir = `${outputDir}/metadata`;
-
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
-  if (!fs.existsSync(metadataDir)) {
-    fs.mkdirSync(metadataDir, { recursive: true });
-  }
-
-  // Generate output filename - always use test.png for test mode
-  const outputFilename = args.isTest
-    ? 'test.png'
-    : args.ethAddress
-    ? `particle_ror_${args.ethAddress.slice(0, 10)}.png`
-    : `particle_ror_${Date.now()}.png`;
-  const outputPath = `${outputDir}/${outputFilename}`;
-
-  console.log(`Generating particle-based Rorschach inkblot...`);
-  console.log(`- Size: ${args.size}x${args.size}`);
-  console.log(`- Output: ${outputPath}`);
-  if (args.isTest) {
-    console.log('- Test mode: Using default parameters');
-  }
-
-  // Generate the inkblot
-  const imageBuffer = generateParticleRorschach(args.ethAddress, {
-    size: args.size,
-  });
-
-  // Save image
-  fs.writeFileSync(outputPath, imageBuffer);
-
-  console.log(`Inkblot generated successfully!`);
-
-  // Generate metadata if ETH address was provided
-  if (args.ethAddress) {
-    const ethFeatures = extractEthFeatures(args.ethAddress);
-    const colorScheme = getColorSchemeFromEthFeatures(ethFeatures);
-
-    // Determine pattern type based on address features
-    const is420Address = args.ethAddress.toLowerCase().includes('420');
-    const isInverted = !is420Address && ethFeatures.zeros > 0.5;
-
-    const metadata = {
-      name: `Infinite Inkblot ${args.ethAddress.slice(0, 10)}`,
-      description:
-        'A unique Rorschach-style inkblot generated from an Ethereum address',
-      image: outputFilename,
-      attributes: [
-        {
-          trait_type: 'Address',
-          value: args.ethAddress,
-        },
-        {
-          trait_type: 'Size',
-          value: `${args.size}x${args.size}`,
-        },
-        {
-          trait_type: 'ColorScheme',
-          value: colorScheme.is420Address
-            ? '420 Special'
-            : colorScheme.colorPairName,
-        },
-        {
-          trait_type: 'PrimaryColor',
-          value: colorScheme.primaryColor,
-        },
-        {
-          trait_type: 'SecondaryColor',
-          value: colorScheme.secondaryColor,
-        },
-        {
-          trait_type: 'Complexity',
-          value: 'Medium',
-        },
-        {
-          trait_type: 'Pattern',
-          value: is420Address ? 'Star' : isInverted ? 'Inverted' : 'Standard',
-        },
-      ],
-    };
-
-    const metadataPath = `${metadataDir}/metadata_${args.ethAddress.slice(
-      0,
-      8
-    )}.json`;
-    fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
-    console.log(`Metadata saved to ${metadataPath}`);
-  }
-}
-
 // Run the main function if this script is executed directly
 if (require.main === module) {
   main();
 }
 
-// Export functions for use as a module
 module.exports = {
   generateParticleRorschach,
-  extractEthFeatures,
+  createSeededRandom,
+  createNoiseFunction,
+  getPlotter,
+  createSymmetricalParticle,
+  createInvertedSymmetricalParticle,
+  createStarSymmetricalParticle,
 };
