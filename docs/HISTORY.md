@@ -56,6 +56,18 @@
 - Enhanced metadata for special address traits
 - Added documentation for special address features
 
+## Color Pairs Refinement (Current)
+
+- Simplified trait system to focus solely on color pairs
+- Removed parameter customization based on ETH features (now uses default parameters for all addresses)
+- Implemented 11 precisely defined color pairs with exact RGB values:
+  - Special '420' pair: Emerald ([0, 106, 58]) and Jade ([68, 156, 116])
+  - 10 regular pairs including Navy & Slate, Golden Brown, Magenta Burst, etc.
+- Created a deterministic selection system that assigns one pair per ETH address
+- Enhanced color distribution within noise ranges for consistent visual patterns
+- Updated metadata to include descriptive color pair names
+- Improved visual cohesion with primary/secondary color positions in patterns
+
 ## Current State
 
 The project has evolved from a simple pixel-based generator to a sophisticated particle-based system with:
@@ -64,8 +76,6 @@ The project has evolved from a simple pixel-based generator to a sophisticated p
 - Organic, ink-like visual effects
 - Special handling for specific address patterns
 - Comprehensive metadata generation
-- Modular and maintainable codebase
-- Enhanced visual quality and performance
 
 ## Future Considerations
 

@@ -1,5 +1,82 @@
 const crypto = require('crypto');
 
+const LESS_UNIQUE = {
+  CONSECUTIVE_REPEAT_COUNT: 5, // no. consecutive repeating characters
+};
+
+/**
+ * Check if a string is a palindrome
+ * @param {string} str - String to check
+ * @returns {boolean} Whether the string is a palindrome
+ */
+function isPalindrome(str) {
+  // Convert to array, reverse, and join back to string
+  return str === Array.from(str).reverse().join('');
+}
+
+/**
+ * Check if the last n characters of a string form a palindrome
+ * @param {string} str - String to check
+ * @param {number} n - Number of characters to check from the end
+ * @returns {boolean} Whether the last n characters form a palindrome
+ */
+function hasPalindromeEnding(str, n) {
+  const lastN = str.slice(-n);
+  return isPalindrome(lastN);
+}
+
+/**
+ * Check if an address is less unique based on repeating characters
+ * @param {string} address - Ethereum address to check
+ * @returns {Object} Object containing whether address is less unique and if it has non-zero repeating characters
+ */
+function isLessUniqueAddress(address) {
+  if (!address) return { isLessUnique: false, hasNonZeroRepeat: false };
+
+  const cleanAddress = address.slice(2).toLowerCase();
+
+  // Check for N+ consecutive repeating characters anywhere
+  let consecutiveCount = 1;
+  let currentChar = cleanAddress[0];
+  let hasConsecutiveRepeat = false;
+  let hasNonZeroRepeat = false;
+
+  for (let i = 1; i < cleanAddress.length; i++) {
+    if (cleanAddress[i] === currentChar) {
+      consecutiveCount++;
+      if (consecutiveCount >= LESS_UNIQUE.CONSECUTIVE_REPEAT_COUNT) {
+        hasConsecutiveRepeat = true;
+        hasNonZeroRepeat = currentChar !== '0';
+        break;
+      }
+    } else {
+      consecutiveCount = 1;
+      currentChar = cleanAddress[i];
+    }
+  }
+
+  return { isLessUnique: hasConsecutiveRepeat, hasNonZeroRepeat };
+}
+
+/**
+ * Determine the type trait for an address
+ * @param {string} address - Ethereum address
+ * @param {Object} ethFeatures - Features extracted from the address
+ * @returns {string} The type trait
+ */
+function determineTypeTrait(address, ethFeatures) {
+  const is420Address = address.toLowerCase().includes('420');
+
+  if (is420Address) {
+    return '420';
+  } else {
+    const traits = [];
+    if (ethFeatures.isLessUnique) traits.push('Repeating');
+    if (ethFeatures.isPalindrome) traits.push('Palindrome');
+    return traits.length > 0 ? traits.join(' ') : 'Standard';
+  }
+}
+
 /**
  * Extract features from an Ethereum address
  * @param {string} ethAddress - Ethereum address
@@ -14,15 +91,18 @@ function extractEthFeatures(ethAddress) {
       letters: 0.5,
       highValues: 0.5,
       evenChars: 0.5,
+      isPalindrome: false,
+      isLessUnique: false,
+      hasNonZeroRepeat: false,
+      type: 'None',
       seed: Math.floor(Math.random() * 100000),
       address: ethAddress || '0x0000000000000000000000000000000000000000',
     };
   }
 
-  // Strip the '0x' prefix
   const cleanAddress = ethAddress.slice(2).toLowerCase();
 
-  // Count character types
+  // count character types
   let zeros = 0;
   let ones = 0;
   let letters = 0;
@@ -38,24 +118,43 @@ function extractEthFeatures(ethAddress) {
     if (parseInt(char, 16) % 2 === 0) evenChars++;
   }
 
-  // Calculate diversity by counting unique characters
+  // calculate diversity
   const uniqueChars = new Set(cleanAddress).size;
-  const diversity = uniqueChars / 16; // 16 possible hex characters
+  const diversity = uniqueChars / 16; // 16 possible hex chars
 
-  // Create a deterministic seed from the address
+  // create deterministic seed from address
   const hash = crypto.createHash('sha256').update(cleanAddress).digest('hex');
   const seed = parseInt(hash.slice(0, 8), 16);
 
-  return {
+  // check for palindromes of length 4 to address length
+  let hasPalindrome = false;
+  for (let len = 4; len <= cleanAddress.length; len++) {
+    if (hasPalindromeEnding(cleanAddress, len)) {
+      hasPalindrome = true;
+      break;
+    }
+  }
+
+  // check for repeating characters
+  const { isLessUnique, hasNonZeroRepeat } = isLessUniqueAddress(ethAddress);
+
+  const features = {
     diversity: diversity,
     zeros: zeros / cleanAddress.length,
     ones: ones / cleanAddress.length,
     letters: letters / cleanAddress.length,
     highValues: highValues / cleanAddress.length,
     evenChars: evenChars / cleanAddress.length,
+    isPalindrome: hasPalindrome,
+    isLessUnique,
+    hasNonZeroRepeat,
     seed: seed,
     address: ethAddress,
   };
+
+  features.type = determineTypeTrait(ethAddress, features);
+
+  return features;
 }
 
 /**
@@ -65,24 +164,8 @@ function extractEthFeatures(ethAddress) {
  * @returns {Object} Modified parameters
  */
 function customizeParamsFromEthFeatures(baseParams, ethFeatures) {
-  const modifiedParams = { ...baseParams };
-
-  // Adjust scale based on diversity - more diverse addresses get more detailed patterns
-  modifiedParams.scale = 0.005 + ethFeatures.diversity * 0.01;
-
-  // Adjust speed based on zeros
-  modifiedParams.speed = 0.003 + ethFeatures.zeros * 0.004;
-
-  // Adjust max particle radius based on high values
-  modifiedParams.maxRadius = 5 + ethFeatures.highValues * 10;
-
-  // Adjust particle count based on ones - constrained between 50-100
-  modifiedParams.particleCount = Math.floor(50 + ethFeatures.ones * 50);
-
-  // Adjust frames based on letters - constrained between 50-200
-  modifiedParams.framesToRender = Math.floor(50 + ethFeatures.letters * 150);
-
-  return modifiedParams;
+  // return baseParams unchanged - no customization based on ETH features
+  return { ...baseParams };
 }
 
 module.exports = {

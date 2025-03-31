@@ -4,7 +4,7 @@
   },
   "name": "infinite-inkblots",
   "version": "1.2.0",
-  "description": "A generative art project creates deterministic Rorschach-style inkblots from Ethereum addresses.",
+  "description": "A generative Rorschach-inspired color study presented as deterministic Rorschach-style inkblots from Ethereum addresses.",
   "main": "src/patternGeneration.js",
   "directories": {
     "doc": "docs"
