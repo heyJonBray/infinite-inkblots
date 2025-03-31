@@ -19,10 +19,9 @@ function extractEthFeatures(ethAddress) {
     };
   }
 
-  // Strip the '0x' prefix
   const cleanAddress = ethAddress.slice(2).toLowerCase();
 
-  // Count character types
+  // count character types
   let zeros = 0;
   let ones = 0;
   let letters = 0;
@@ -38,11 +37,11 @@ function extractEthFeatures(ethAddress) {
     if (parseInt(char, 16) % 2 === 0) evenChars++;
   }
 
-  // Calculate diversity by counting unique characters
+  // calculate diversity
   const uniqueChars = new Set(cleanAddress).size;
-  const diversity = uniqueChars / 16; // 16 possible hex characters
+  const diversity = uniqueChars / 16; // 16 possible hex chars
 
-  // Create a deterministic seed from the address
+  // create deterministic seed from address
   const hash = crypto.createHash('sha256').update(cleanAddress).digest('hex');
   const seed = parseInt(hash.slice(0, 8), 16);
 
@@ -65,7 +64,7 @@ function extractEthFeatures(ethAddress) {
  * @returns {Object} Modified parameters
  */
 function customizeParamsFromEthFeatures(baseParams, ethFeatures) {
-  // Return baseParams unchanged - no customization based on ETH features
+  // return baseParams unchanged - no customization based on ETH features
   return { ...baseParams };
 }
 

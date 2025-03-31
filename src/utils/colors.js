@@ -173,19 +173,30 @@ function createColorString(color, alpha = 150) {
 }
 
 /**
+ * Check if an address is a 420 address (starts or ends with 420)
+ * @param {string} address - Ethereum address to check
+ * @returns {boolean} Whether the address is a 420 address
+ */
+function is420Address(address) {
+  if (!address) return false;
+  const lowerAddress = address.toLowerCase();
+  return lowerAddress.startsWith('0x420') || lowerAddress.endsWith('420');
+}
+
+/**
  * Select a color pair based on deterministic address properties
  * @param {Object} ethFeatures - Features extracted from ETH address
  * @returns {Object} Selected color pair
  */
 function selectColorPair(ethFeatures) {
   // Special case: 420 address gets the 420 Special pair
-  if (ethFeatures.address && ethFeatures.address.includes('420')) {
+  if (is420Address(ethFeatures.address)) {
     return COLOR_PAIRS[0]; // The 420 Special pair is first in the array
   }
 
-  // Use the seed to deterministically select a color pair
-  // We'll use modulo (COLOR_PAIRS.length - 1) to exclude the 420 Special pair
-  // Then add 1 to skip the 420 Special pair (index 0)
+  // deterministically select color pair from seed
+  // exclude "420 Special" pair with modulo (COLOR_PAIRS.length - 1)
+  // then add 1 to skip the "420 Special" pair (index 0)
   const pairIndex = (ethFeatures.seed % (COLOR_PAIRS.length - 1)) + 1;
   return COLOR_PAIRS[pairIndex];
 }
@@ -201,9 +212,8 @@ function generateColorScheme(pair, is420Special = false) {
   const primary = createColorString(pair.primary);
   const secondary = createColorString(pair.secondary);
 
-  // Create a color scheme using the pair's colors
   if (is420Special) {
-    // Special pattern for 420 addresses
+    // color pattern for 420 addresses
     return [
       black, // 0.0-0.1 noise range - minimal usage, background/edges
       primary, // 0.1-0.2 noise range - outlines and deep shadows
@@ -218,7 +228,7 @@ function generateColorScheme(pair, is420Special = false) {
     ];
   }
   // else if (isDeadAddress) {
-  //   //todo: add dead address pattern
+  // @todo: add dead address/high repeating character pattern
   //   return [
   //     white, // 0.0-0.1 noise range - minimal usage, background/edges
   //     black, // 0.1-0.2 noise range - outlines and deep shadows
@@ -233,7 +243,7 @@ function generateColorScheme(pair, is420Special = false) {
   //   ];
   // }
   else {
-    // Default pattern for regular addresses
+    // default pattern
     return [
       secondary, // 0.0-0.1 noise range - minimal usage, background/edges
       black, // 0.1-0.2 noise range - outlines and deep shadows
@@ -255,22 +265,21 @@ function generateColorScheme(pair, is420Special = false) {
  * @returns {Object} Object containing colors array and color information
  */
 function getColorSchemeFromEthFeatures(ethFeatures) {
-  // Check if address contains 420 anywhere
-  const is420Address =
-    ethFeatures.address && ethFeatures.address.includes('420');
-
   // Select a color pair based on the ETH address
   const colorPair = selectColorPair(ethFeatures);
 
   // Generate the color scheme from the selected pair
-  const colors = generateColorScheme(colorPair, is420Address);
+  const colors = generateColorScheme(
+    colorPair,
+    is420Address(ethFeatures.address)
+  );
 
   return {
     colors,
     primaryColor: colorPair.primary.name,
     secondaryColor: colorPair.secondary.name,
     colorPairName: colorPair.name,
-    is420Address,
+    is420Address: is420Address(ethFeatures.address),
   };
 }
 
