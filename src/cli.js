@@ -6,15 +6,101 @@ const { getColorSchemeFromEthFeatures } = require('./utils/colors');
 const SAMPLE_ADDRESSES = [
   '0x5B38Da6a701c568545dCfcB03FcB875f56beddC4', // jonbray.eth
   '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B', // vitalik.eth
-  '0x1db3439a222c519ab44bb1144fc28167b4fa6ee6', // Maker DAO address
+  '0x1db3439a222c519ab44bb1144fc28167b4fa6ee6', // Maker DAO (palindrome)
   '0x742d35Cc6634C0532925a3b844Bc454e4438f44e', // Uniswap address
-  '0x0000000000000000000000000000000000000000', // Zero address
-  '0x000000000000000000000000000000000000dead', // "Dead" address
-  '0x9e13480a81Af1Dea2f255761810Ef8d6CbF21735', // $ROR address
-  '0x8888888888888888888888888888888888888888', // Repeating 8s
+  '0x0000000000000000000000000000000000000000', // Zero address (monochrome)
+  '0x8888888888888888888888888888888888888888', // 88888888 (sepia)
   '0xabcdef0123456789abcdef0123456789abcdef01', // Sequential
   '0x7e2F9dd040cF7B41a1AF9e4A24A0EDB04093d420', // 420 special
 ];
+
+/**
+ * Log generation details for an inkblot
+ * @param {string} address - The Ethereum address
+ * @param {Object} ethFeatures - Features extracted from the address
+ * @param {Object} colorScheme - Color scheme for the inkblot
+ */
+function logGenerationDetails(address, ethFeatures, colorScheme) {
+  console.log(`\nGeneration details for ${address}:`);
+  console.log(`- Scale: ${ethFeatures.scale?.toFixed(4) || 'default'}`);
+  console.log(`- Particles: ${ethFeatures.particleCount || 'default'}`);
+  console.log(`- Frames: ${ethFeatures.framesToRender || 'default'}`);
+  console.log(`- Seed: ${ethFeatures.seed}`);
+  console.log(
+    `- Pattern: ${
+      ethFeatures.is420Address
+        ? 'Star'
+        : ethFeatures.isInverted
+        ? 'Inverted'
+        : 'Standard'
+    }`
+  );
+  console.log(`- Type: ${ethFeatures.type}`);
+  console.log(
+    `- Color Scheme: ${
+      colorScheme.is420Address ? '420 Special' : colorScheme.colorPairName
+    }`
+  );
+}
+
+/**
+ * Generate metadata for an inkblot
+ * @param {string} address - Ethereum address
+ * @param {string} outputFilename - Name of the generated image file
+ * @param {number} size - Size of the generated image
+ * @param {Object} ethFeatures - Features extracted from the address
+ * @param {Object} colorScheme - Color scheme for the inkblot
+ * @returns {Object} Metadata object
+ */
+function generateMetadata(
+  address,
+  outputFilename,
+  size,
+  ethFeatures,
+  colorScheme
+) {
+  const is420Address = address.toLowerCase().includes('420');
+  const isInverted = !is420Address && ethFeatures.isPalindrome;
+
+  return {
+    name: `Infinite Inkblot ${address.slice(0, 10)}`,
+    description:
+      'A unique Rorschach-style inkblot generated from an Ethereum address',
+    image: outputFilename,
+    attributes: [
+      {
+        trait_type: 'Address',
+        value: address,
+      },
+      {
+        trait_type: 'Size',
+        value: `${size}x${size}`,
+      },
+      {
+        trait_type: 'ColorScheme',
+        value: colorScheme.is420Address
+          ? '420 Special'
+          : colorScheme.colorPairName,
+      },
+      {
+        trait_type: 'PrimaryColor',
+        value: colorScheme.primaryColor,
+      },
+      {
+        trait_type: 'SecondaryColor',
+        value: colorScheme.secondaryColor,
+      },
+      {
+        trait_type: 'Type',
+        value: ethFeatures.type,
+      },
+      {
+        trait_type: 'Pattern',
+        value: is420Address ? 'Leaf' : isInverted ? 'Inverted' : 'Standard',
+      },
+    ],
+  };
+}
 
 /**
  * Parse command line arguments
@@ -76,7 +162,7 @@ async function generateExamples() {
 
     const outputPath = `${OUTPUT_DIR}/particle_ror_${address}.png`;
 
-    // Generate the inkblot
+    // generate inkblot
     const imageBuffer = generateParticleRorschach(address, {
       size: 1024,
       outputPath: outputPath,
@@ -87,52 +173,20 @@ async function generateExamples() {
     const ethFeatures = extractEthFeatures(address);
     const colorScheme = getColorSchemeFromEthFeatures(ethFeatures);
 
-    // Determine pattern type based on address features
-    const is420Address = address.toLowerCase().includes('420');
-    const isInverted = !is420Address && ethFeatures.zeros > 0.5;
+    // log generation details
+    logGenerationDetails(address, ethFeatures, colorScheme);
 
     const metadataPath = `${METADATA_DIR}/metadata_${address.substring(
       0,
       8
     )}.json`;
-    const metadata = {
-      name: `Infinite Inkblot ${address.slice(0, 10)}`,
-      description:
-        'A unique Rorschach-style inkblot generated from an Ethereum address',
-      image: outputPath.split('/').pop(),
-      attributes: [
-        {
-          trait_type: 'Address',
-          value: address,
-        },
-        {
-          trait_type: 'Size',
-          value: '1024x1024',
-        },
-        {
-          trait_type: 'ColorScheme',
-          value: colorScheme.is420Address
-            ? '420 Special'
-            : colorScheme.colorPairName,
-        },
-        {
-          trait_type: 'PrimaryColor',
-          value: colorScheme.primaryColor,
-        },
-        {
-          trait_type: 'SecondaryColor',
-          value: colorScheme.secondaryColor,
-        },
-        {
-          trait_type: 'Complexity',
-          value: 'Medium',
-        },
-        {
-          trait_type: 'Pattern',
-          value: is420Address ? 'Star' : isInverted ? 'Inverted' : 'Standard',
-        },
-      ],
-    };
+    const metadata = generateMetadata(
+      address,
+      outputPath.split('/').pop(),
+      1024,
+      ethFeatures,
+      colorScheme
+    );
 
     fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
     console.log(`Metadata saved to: ${metadataPath}`);
@@ -193,52 +247,21 @@ async function main() {
     const ethFeatures = extractEthFeatures(args.ethAddress);
     const colorScheme = getColorSchemeFromEthFeatures(ethFeatures);
 
-    const is420Address = args.ethAddress.toLowerCase().includes('420');
-    const isInverted = !is420Address && ethFeatures.zeros > 0.5;
-
-    const metadata = {
-      name: `Infinite Inkblot ${args.ethAddress.slice(0, 10)}`,
-      description:
-        'A unique Rorschach-style inkblot generated from an Ethereum address',
-      image: outputFilename,
-      attributes: [
-        {
-          trait_type: 'Address',
-          value: args.ethAddress,
-        },
-        {
-          trait_type: 'Size',
-          value: `${args.size}x${args.size}`,
-        },
-        {
-          trait_type: 'ColorScheme',
-          value: colorScheme.is420Address
-            ? '420 Special'
-            : colorScheme.colorPairName,
-        },
-        {
-          trait_type: 'PrimaryColor',
-          value: colorScheme.primaryColor,
-        },
-        {
-          trait_type: 'SecondaryColor',
-          value: colorScheme.secondaryColor,
-        },
-        {
-          trait_type: 'Complexity',
-          value: 'Medium',
-        },
-        {
-          trait_type: 'Pattern',
-          value: is420Address ? 'Star' : isInverted ? 'Inverted' : 'Standard',
-        },
-      ],
-    };
+    // log generation details
+    logGenerationDetails(args.ethAddress, ethFeatures, colorScheme);
 
     const metadataPath = `${metadataDir}/metadata_${args.ethAddress.slice(
       0,
       8
     )}.json`;
+    const metadata = generateMetadata(
+      args.ethAddress,
+      outputFilename,
+      args.size,
+      ethFeatures,
+      colorScheme
+    );
+
     fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
     console.log(`Metadata saved to ${metadataPath}`);
   }

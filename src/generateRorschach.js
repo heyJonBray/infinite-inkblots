@@ -64,18 +64,24 @@ function generateParticleRorschach(ethAddress, customParams = {}) {
     seededRandom = createSeededRandom(ethFeatures.seed);
 
     // Now set isInverted AFTER we've set is420Address
-    isInverted = !is420Address && ethFeatures.zeros > 0.5;
+    // Only invert if it's not a 420 address and has a palindrome ending
+    isInverted = !is420Address && ethFeatures.isPalindrome;
 
-    console.log(`Using ETH features for address ${ethAddress}:`);
-    console.log(`- Scale: ${currentParams.scale.toFixed(4)}`);
-    console.log(`- Particles: ${currentParams.particleCount}`);
-    console.log(`- Frames: ${currentParams.framesToRender}`);
-    console.log(`- Seed: ${ethFeatures.seed}`);
-    console.log(
-      `- Pattern: ${
-        is420Address ? 'Star' : isInverted ? 'Inverted' : 'Standard'
-      }`
-    );
+    // determine "type" trait - 420 is exclusive, but palindrome and repeating can combine
+    let type = 'None';
+    if (is420Address) {
+      type = '420';
+    } else {
+      const traits = [];
+      if (ethFeatures.isLessUnique) traits.push('Repeating');
+      if (ethFeatures.isPalindrome) traits.push('Palindrome');
+      type = traits.length > 0 ? traits.join(' ') : 'None';
+    }
+
+    // Return the traits along with the features for logging in CLI
+    ethFeatures.type = type;
+    ethFeatures.isInverted = isInverted;
+    ethFeatures.is420Address = is420Address;
   } else {
     // Use default features for non-ETH case
     ethFeatures = {

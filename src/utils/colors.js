@@ -8,6 +8,19 @@ const COLORS = {
     name: 'Black',
     rgb: [0, 0, 0],
   },
+  GREY: {
+    name: 'Grey',
+    rgb: [64, 64, 64],
+  },
+  // sepia color pairs
+  SEPIA_DARK: {
+    name: 'Sepia Dark',
+    rgb: [112, 66, 20],
+  },
+  SEPIA_LIGHT: {
+    name: 'Sepia Light',
+    rgb: [176, 104, 33],
+  },
   // 420 Special colors
   EMERALD: {
     name: 'Emerald',
@@ -17,7 +30,7 @@ const COLORS = {
     name: 'Jade',
     rgb: [68, 156, 116],
   },
-  // Other color pairs
+  // standardcolor pairs
   NAVY_BLUE: {
     name: 'Navy Blue',
     rgb: [52, 68, 121],
@@ -52,11 +65,6 @@ const COLORS = {
   },
   COPPER: {
     name: 'Copper',
-    rgb: [113, 68, 45],
-  },
-  COPPER_REPEAT: {
-    // Note: same value as above, potential typo in request
-    name: 'Copper Repeat',
     rgb: [113, 68, 45],
   },
   DEEP_PURPLE: {
@@ -108,6 +116,18 @@ const COLOR_PAIRS = [
     primary: COLORS.EMERALD,
     secondary: COLORS.JADE,
   },
+  // monochrome pair (repeating zeros)
+  {
+    name: 'Monochrome',
+    primary: COLORS.BLACK,
+    secondary: COLORS.GREY,
+  },
+  // sepia pair (repeating non-zero characters)
+  {
+    name: 'Sepia',
+    primary: COLORS.SEPIA_DARK,
+    secondary: COLORS.SEPIA_LIGHT,
+  },
   // Other pairs
   {
     name: 'Navy & Slate',
@@ -132,7 +152,7 @@ const COLOR_PAIRS = [
   {
     name: 'Copper Tone',
     primary: COLORS.COPPER,
-    secondary: COLORS.COPPER_REPEAT,
+    secondary: COLORS.DEEP_BROWN,
   },
   {
     name: 'Purple Haze',
@@ -189,15 +209,19 @@ function is420Address(address) {
  * @returns {Object} Selected color pair
  */
 function selectColorPair(ethFeatures) {
-  // Special case: 420 address gets the 420 Special pair
+  // 420 address gets the 420 Special pair
   if (is420Address(ethFeatures.address)) {
-    return COLOR_PAIRS[0]; // The 420 Special pair is first in the array
+    return COLOR_PAIRS[0];
+  }
+
+  // less unique addresses get either monochrome or sepia colors based on repeating character
+  if (ethFeatures.isLessUnique) {
+    return ethFeatures.hasNonZeroRepeat ? COLOR_PAIRS[2] : COLOR_PAIRS[1];
   }
 
   // deterministically select color pair from seed
-  // exclude "420 Special" pair with modulo (COLOR_PAIRS.length - 1)
-  // then add 1 to skip the "420 Special" pair (index 0)
-  const pairIndex = (ethFeatures.seed % (COLOR_PAIRS.length - 1)) + 1;
+  // exclude "420 Special", "Monochrome", and "Sepia" pairs with modulo (COLOR_PAIRS.length - 3)
+  const pairIndex = (ethFeatures.seed % (COLOR_PAIRS.length - 3)) + 3;
   return COLOR_PAIRS[pairIndex];
 }
 
@@ -206,7 +230,7 @@ function selectColorPair(ethFeatures) {
  * @param {Object} pair - Color pair to use
  * @returns {Array} Array of colors for the scheme
  */
-function generateColorScheme(pair, is420Special = false) {
+function generateColorScheme(pair, is420Special = false, isLessUnique = false) {
   const white = createColorString(COLORS.WHITE);
   const black = createColorString(COLORS.BLACK);
   const primary = createColorString(pair.primary);
@@ -226,23 +250,21 @@ function generateColorScheme(pair, is420Special = false) {
       secondary, // 0.8-0.9 noise range - secondary color, accents
       white, // 0.9-1.0 noise range - minimal usage, highest noise values
     ];
-  }
-  // else if (isDeadAddress) {
-  // @todo: add dead address/high repeating character pattern
-  //   return [
-  //     white, // 0.0-0.1 noise range - minimal usage, background/edges
-  //     black, // 0.1-0.2 noise range - outlines and deep shadows
-  //     black, // 0.2-0.3 noise range - primary color, inner details
-  //     black, // 0.3-0.4 noise range - primary color, major features
-  //     white, // 0.4-0.5 noise range - secondary color, transition areas
-  //     black, // 0.5-0.6 noise range - central shadows
-  //     black, // 0.6-0.7 noise range - primary color, core details
-  //     black, // 0.7-0.8 noise range - primary color, highlights
-  //     black, // 0.8-0.9 noise range - secondary color, accents
-  //     white, // 0.9-1.0 noise range - minimal usage, highest noise values
-  //   ];
-  // }
-  else {
+  } else if (isLessUnique) {
+    // monochrome/sepia pattern for less unique addresses
+    return [
+      black, // 0.0-0.1 noise range - minimal usage, background/edges
+      secondary, // 0.1-0.2 noise range - outlines and deep shadows
+      secondary, // 0.2-0.3 noise range - grey/sepia color, inner details
+      primary, // 0.3-0.4 noise range - grey/sepia color, major features
+      black, // 0.4-0.5 noise range - grey/sepia color, transition areas
+      secondary, // 0.5-0.6 noise range - grey/sepia color, central shadows
+      primary, // 0.6-0.7 noise range - grey/sepia color, core details
+      black, // 0.7-0.8 noise range - grey/sepia color, highlights
+      secondary, // 0.8-0.9 noise range - grey/sepia color, accents
+      white, // 0.9-1.0 noise range - minimal usage, highest noise values
+    ];
+  } else {
     // default pattern
     return [
       secondary, // 0.0-0.1 noise range - minimal usage, background/edges
@@ -271,7 +293,8 @@ function getColorSchemeFromEthFeatures(ethFeatures) {
   // Generate the color scheme from the selected pair
   const colors = generateColorScheme(
     colorPair,
-    is420Address(ethFeatures.address)
+    is420Address(ethFeatures.address),
+    ethFeatures.isLessUnique
   );
 
   return {
@@ -280,6 +303,7 @@ function getColorSchemeFromEthFeatures(ethFeatures) {
     secondaryColor: colorPair.secondary.name,
     colorPairName: colorPair.name,
     is420Address: is420Address(ethFeatures.address),
+    isLessUnique: ethFeatures.isLessUnique,
   };
 }
 
