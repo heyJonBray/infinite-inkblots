@@ -1,10 +1,7 @@
 /**
- * Rendering utilities for the Rorschach inkblot generator
+ * Rendering utilities for particle generation
  */
 
-/**
- * Constants for particle rendering
- */
 const RENDER_CONSTANTS = {
   MIN_PARTICLE_SIZE_RATIO: 0.1,
   EDGE_FALLOFF_FACTOR: 0.8,
@@ -14,7 +11,7 @@ const RENDER_CONSTANTS = {
 };
 
 /**
- * Initialize the canvas for rendering
+ * Initialize the canvas with white background
  * @param {Object} canvasLib - Canvas creation library
  * @param {number} size - Canvas size
  * @returns {Object} Canvas and context
@@ -23,7 +20,6 @@ function initializeCanvas(canvasLib, size) {
   const canvas = canvasLib(size, size);
   const ctx = canvas.getContext('2d');
 
-  // Fill with white background
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, size, size);
 
@@ -77,11 +73,11 @@ function calculateAdjustedNoiseValue(noiseValue, distanceFromCenter) {
  * @returns {number} Final particle radius
  */
 function calculateParticleRadius(baseRadius, distanceFromCenter, maxRadius) {
-  // Calculate edge factor for organic falloff
+  // edge factor for organic particle falloff
   const edgeFactor = Math.pow(distanceFromCenter, 2);
   const sizeVariation = 1 - edgeFactor * RENDER_CONSTANTS.EDGE_FALLOFF_FACTOR;
 
-  // Add some randomness to edge particles
+  // add randomness to edges
   const edgeNoise = Math.pow(
     Math.sin(
       distanceFromCenter * Math.PI * RENDER_CONSTANTS.EDGE_NOISE_FREQUENCY
@@ -94,7 +90,8 @@ function calculateParticleRadius(baseRadius, distanceFromCenter, maxRadius) {
     (sizeVariation *
       (0.6 + RENDER_CONSTANTS.EDGE_NOISE_MULTIPLIER * edgeNoise));
 
-  // Ensure minimum particle size for visual interest
+  // ensure minimum particle size
+  // @todo revisit minimum size and consider making smaller and more frequent for better detail
   return Math.max(
     organicRadius,
     maxRadius * RENDER_CONSTANTS.MIN_PARTICLE_SIZE_RATIO
@@ -124,10 +121,10 @@ function drawParticle(ctx, x, y, radius) {
 function renderParticlePair(ctx, particles, color, radius) {
   ctx.fillStyle = color;
 
-  // Draw the original particle (left side)
+  // draw original particle (left side)
   drawParticle(ctx, particles.original.x, particles.original.y, radius);
 
-  // Draw the mirrored particle (right side)
+  // draw mirrored particle (right side)
   drawParticle(ctx, particles.mirrored.x, particles.mirrored.y, radius);
 }
 
@@ -154,12 +151,12 @@ function renderFrame(ctx, params, state, createParticleFunc, noiseFunc) {
   const centerX = size / 2;
   const centerY = size / 2;
 
-  // Fade the canvas
+  // fade the canvas
   fadeCanvas(ctx, size, params.fadeAlpha);
 
-  // Generate and render particles
+  // generate and render particles
   for (let i = 0; i < particleCount; i++) {
-    // Create particle pair using the provided function
+    // create particle pair using the provided function
     const particles = createParticleFunc(
       seededRandom,
       size,
@@ -167,13 +164,13 @@ function renderFrame(ctx, params, state, createParticleFunc, noiseFunc) {
       verticalMargin
     );
 
-    // Calculate noise value
+    // calculate noise value
     const xNoise = particles.original.x * scale;
     const yNoise = particles.original.y * scale;
     const timeNoise = frame * speed;
     const noiseValue = noiseFunc(xNoise, yNoise, timeNoise);
 
-    // Calculate distance-based values
+    // calculate distance-based values
     const distanceFromCenter = calculateDistanceFromCenter(
       particles.original.x,
       particles.original.y,
@@ -182,31 +179,31 @@ function renderFrame(ctx, params, state, createParticleFunc, noiseFunc) {
       size
     );
 
-    // Adjust noise value based on distance
+    // adjust noise value based on distance
     const adjustedValue = calculateAdjustedNoiseValue(
       noiseValue,
       distanceFromCenter
     );
 
-    // Get particle properties
+    // get particle properties
     const { color, radius } = state.getPlotter(
       adjustedValue,
       colors,
       maxRadius
     );
 
-    // Calculate final radius with organic edge effects
+    // calculate final radius with organic edge effects
     const finalRadius = calculateParticleRadius(
       radius,
       distanceFromCenter,
       maxRadius
     );
 
-    // Render the particle pair
+    // render the particle pair
     renderParticlePair(ctx, particles, color, finalRadius);
   }
 
-  // Output progress indicator
+  // output progress indicator
   if (frame % 10 === 0) {
     process.stdout.write('.');
   }
@@ -228,7 +225,7 @@ function renderRorschach(canvasLib, params, state) {
     `Generating particle-based Rorschach with ${params.framesToRender} frames and ${params.particleCount} particles per frame...`
   );
 
-  // Select particle creation function based on pattern type
+  // select particle creation function based on pattern type
   let createParticleFunc;
   if (state.is420Address) {
     createParticleFunc = state.createStarSymmetricalParticle;
@@ -238,7 +235,7 @@ function renderRorschach(canvasLib, params, state) {
       : state.createSymmetricalParticle;
   }
 
-  // Render all frames
+  // render all frames
   for (let frame = 0; frame < params.framesToRender; frame++) {
     renderFrame(
       ctx,
@@ -251,7 +248,7 @@ function renderRorschach(canvasLib, params, state) {
 
   process.stdout.write('\n');
 
-  // Return the image buffer
+  // return the image buffer
   return canvas.toBuffer('image/png');
 }
 

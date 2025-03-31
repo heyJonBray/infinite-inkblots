@@ -182,37 +182,37 @@ function createSymmetricalParticle(
   horizontalMargin,
   verticalMargin
 ) {
-  // Calculate the usable area dimensions
+  // calculate the usable area dimensions
   const usableWidth = size * (1 - 2 * horizontalMargin);
   const usableHeight = size * (1 - 2 * verticalMargin);
 
-  // Keep trying until we get a valid particle
+  // keep trying until we get a valid particle
   let attempts = 0;
   let x, y;
 
   do {
-    // Generate a point in the left half of the usable area, then adjust for margin
+    // generate a point in the left half of the usable area, then adjust for margin
     x = seededRandom() * (usableWidth / 2) + size * horizontalMargin;
     y = seededRandom() * usableHeight + size * verticalMargin;
 
-    // Calculate distance from center as normalized values (0 to 1)
+    // calculate distance from center as normalized values (0 to 1)
     const centerX = size / 2;
     const centerY = size / 2;
 
-    // Normalized distances from center (0 = center, 1 = furthest edge)
+    // normalized distances from center (0 = center, 1 = furthest edge)
     const dx = Math.abs(x - centerX) / (size / 2);
     const dy = Math.abs(y - centerY) / (size / 2);
 
-    // Weight the distances differently
-    // Higher weight for horizontal distance (more spread out)
-    // Lower weight for vertical distance (tighter distribution)
+    // weight the distances differently
+    // higher weight for horizontal distance (more spread out)
+    // lower weight for vertical distance (tighter distribution)
     const weightedDist = dx * 0.7 + dy * 0.3;
 
-    // Acceptance probability: higher near center, lower near edges
-    // Using a higher exponent (4) for more dramatic falloff
+    // acceptance probability: higher near center, lower near edges
+    // using a higher exponent (4) for more dramatic falloff
     const acceptanceProbability = Math.pow(1 - weightedDist, 4);
 
-    // Accept the particle based on its weighted distance from center
+    // accept the particle based on its weighted distance from center
     if (
       seededRandom() < acceptanceProbability ||
       attempts > PARTICLE_CONSTANTS.MAX_ATTEMPTS
@@ -221,9 +221,9 @@ function createSymmetricalParticle(
     }
 
     attempts++;
-  } while (attempts <= PARTICLE_CONSTANTS.MAX_ATTEMPTS); // Give up after 10 attempts to avoid infinite loops
+  } while (attempts <= PARTICLE_CONSTANTS.MAX_ATTEMPTS);
 
-  // Create the mirrored point for perfect bilateral symmetry
+  // create the mirrored point for perfect bilateral symmetry
   const mirrorX = size - x;
 
   return {
@@ -245,43 +245,43 @@ function createInvertedSymmetricalParticle(
   horizontalMargin,
   verticalMargin
 ) {
-  // Calculate the usable area dimensions
+  // calculate the usable area dimensions
   const usableWidth = size * (1 - 2 * horizontalMargin);
   const usableHeight = size * (1 - 2 * verticalMargin);
 
-  // Calculate the maximum radius for the circular boundary
-  // Use the smaller of width/2 or height/2 to ensure the circle fits
+  // calculate the maximum radius for the circular boundary
+  // use the smaller of width/2 or height/2 to ensure the circle fits
   const maxRadius = Math.min(usableWidth, usableHeight) / 2;
 
-  // Keep trying until we get a valid particle
+  // keep trying until we get a valid particle
   let attempts = 0;
   let x, y;
 
   do {
-    // Generate a point in the left half of the usable area
+    // generate a point in the left half of the usable area
     x = seededRandom() * (usableWidth / 2) + size * horizontalMargin;
     y = seededRandom() * usableHeight + size * verticalMargin;
 
-    // Calculate distance from center as normalized values (0 to 1)
+    // calculate distance from center as normalized values (0 to 1)
     const centerX = size / 2;
     const centerY = size / 2;
 
-    // Calculate distance from center
+    // calculate distance from center
     const dx = x - centerX;
     const dy = y - centerY;
     const distanceFromCenter = Math.sqrt(dx * dx + dy * dy) / maxRadius;
 
-    // Create a more organic boundary by combining linear and circular falloff
+    // create a more organic boundary by combining linear and circular falloff
     const linearFalloff = Math.pow(1 - distanceFromCenter, 4);
     const circularFalloff = Math.pow(
       1 - distanceFromCenter * distanceFromCenter,
       2
     );
 
-    // Weight the falloffs to create a natural transition
+    // weight the falloffs to create a natural transition
     const acceptanceProbability = linearFalloff * 0.7 + circularFalloff * 0.3;
 
-    // Accept the particle based on its distance from center
+    // accept the particle based on its distance from center
     if (
       seededRandom() < acceptanceProbability ||
       attempts > PARTICLE_CONSTANTS.MAX_ATTEMPTS
@@ -290,9 +290,9 @@ function createInvertedSymmetricalParticle(
     }
 
     attempts++;
-  } while (attempts <= PARTICLE_CONSTANTS.MAX_ATTEMPTS); // Give up after 10 attempts to avoid infinite loops
+  } while (attempts <= PARTICLE_CONSTANTS.MAX_ATTEMPTS);
 
-  // Create the mirrored point for perfect bilateral symmetry
+  // create the mirrored point for perfect bilateral symmetry
   const mirrorX = size - x;
 
   return {
@@ -314,51 +314,51 @@ function createStarSymmetricalParticle(
   horizontalMargin,
   verticalMargin
 ) {
-  // Calculate the usable area dimensions
+  // calculate the usable area dimensions
   const usableWidth = size * (1 - 2 * horizontalMargin);
   const usableHeight = size * (1 - 2 * verticalMargin);
 
-  // Calculate the maximum radius for the star pattern
+  // calculate the maximum radius for the star pattern
   const maxRadius = Math.min(usableWidth, usableHeight) / 2;
 
-  // Keep trying until we get a valid particle
+  // keep trying until we get a valid particle
   let attempts = 0;
   let x, y;
 
   do {
-    // Generate a point in the left half of the usable area
+    // generate a point in the left half of the usable area
     x = seededRandom() * (usableWidth / 2) + size * horizontalMargin;
     y = seededRandom() * usableHeight + size * verticalMargin;
 
-    // Calculate distance from center
+    // calculate distance from center
     const centerX = size / 2;
     const centerY = size / 2;
     const dx = x - centerX;
     const dy = y - centerY;
     const distanceFromCenter = Math.sqrt(dx * dx + dy * dy) / maxRadius;
 
-    // Calculate angle from center (in radians)
+    // calculate angle from center (in radians)
     const angle = Math.atan2(dy, dx);
 
-    // Create leaf pattern by combining multiple components
+    // create leaf pattern by combining multiple components
     const radialFalloff = Math.pow(1 - distanceFromCenter, 3);
 
-    // Create 3.5-pointed leaf pattern (7 points total when mirrored)
-    // Use different frequencies to create more organic variation
-    const mainPoints = Math.pow(Math.sin(angle * 3.5), 2); // Main 3.5 points per side
-    const subPoints = Math.pow(Math.sin(angle * 7), 2) * 0.5; // Sub-points for texture
+    // create 3.5-pointed leaf pattern (7 points total when mirrored)
+    // use different frequencies to create more organic variation
+    const mainPoints = Math.pow(Math.sin(angle * 3.5), 2); // main 3.5 points per side
+    const subPoints = Math.pow(Math.sin(angle * 7), 2) * 0.5; // sub-points for texture
     const leafPattern = mainPoints * 0.7 + subPoints * 0.3;
 
-    // Add some asymmetry to make it more leaf-like
-    const asymmetry = Math.sin(angle * 1.75) * 0.2; // Creates slight asymmetry in the lobes
+    // add some asymmetry to make it more leaf-like
+    const asymmetry = Math.sin(angle * 1.75) * 0.2; // creates slight asymmetry in the lobes
 
-    // Combine patterns with weights
+    // combine patterns with weights
     const acceptanceProbability =
-      radialFalloff * 0.5 + // Base radial distribution
-      leafPattern * 0.4 + // Main leaf pattern
-      asymmetry * 0.1; // Asymmetry for organic feel
+      radialFalloff * 0.5 + // base radial distribution
+      leafPattern * 0.4 + // main leaf pattern
+      asymmetry * 0.1; // asymmetry for organic feel
 
-    // Accept the particle based on the combined pattern
+    // accept the particle based on the combined pattern
     if (
       seededRandom() < acceptanceProbability ||
       attempts > PARTICLE_CONSTANTS.MAX_ATTEMPTS
@@ -367,9 +367,9 @@ function createStarSymmetricalParticle(
     }
 
     attempts++;
-  } while (attempts <= PARTICLE_CONSTANTS.MAX_ATTEMPTS); // Give up after 10 attempts to avoid infinite loops
+  } while (attempts <= PARTICLE_CONSTANTS.MAX_ATTEMPTS);
 
-  // Create the mirrored point for perfect bilateral symmetry
+  // create the mirrored point for perfect bilateral symmetry
   const mirrorX = size - x;
 
   return {
@@ -378,7 +378,7 @@ function createStarSymmetricalParticle(
   };
 }
 
-// Export all the particle-related functions
+// export all the particle-related functions
 module.exports = {
   createSeededRandom,
   createNoiseFunction,

@@ -1,5 +1,5 @@
 /**
- * Rorschach inkblot generator
+ * Infinite Inkblots Rorschach Generator
  * Generates deterministic Rorschach-style inkblots based on Ethereum addresses
  *
  * @module generateRorschach

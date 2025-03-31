@@ -32,13 +32,13 @@ npm install
 ### Basic Usage
 
 ```bash
-npm run generate -- --ethAddress 0x7e2F9dd040cF7B41a1AF9e4A24A0EDB04093dDa1
+node index.js --ethAddress 0x7e2F9dd040cF7B41a1AF9e4A24A0EDB04093dDa1
 ```
 
 ### Advanced Options
 
 ```bash
-npm run generate -- \
+node index.js \
   --ethAddress 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4 \
   --size 1200 \
   --outputPath output/custom_name.png
@@ -51,6 +51,7 @@ The generator will automatically save metadata to `output/metadata/` directory.
 - `--ethAddress`: Ethereum address for deterministic generation
 - `--size`: Canvas size in pixels (default: 800)
 - `--outputPath`: Path for saving the output image
+- `--test`: Run a single address and save to test.png
 
 The generator automatically determines optimal parameters based on the Ethereum address:
 
@@ -64,7 +65,11 @@ The generator automatically determines optimal parameters based on the Ethereum 
 To generate multiple examples from different Ethereum addresses:
 
 ```bash
-node examples.js
+// run a single example generation
+node index.js --example
+
+// run batch examples generation
+node index.js --examples
 ```
 
 This will generate:
@@ -117,7 +122,10 @@ The generator automatically extracts traits for NFT metadata and saves them to `
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-### TODO
+### todo
 
-- [ ] rename the color pairs
+- [x] rename the color pairs
 - [ ] make some more patterns!
+- [ ] tweak 420 pattern to look more leaf-like
+- [ ] switch current high-zero pattern to be for palindromes
+- [ ] create new high-zero pattern that uses lighter/smaller/less dense particles
