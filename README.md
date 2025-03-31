@@ -1,15 +1,17 @@
 # Infinite Inkblots
 
-A generative art project that creates beautiful particle-based Rorschach-style inkblots from Ethereum addresses. Each address produces a unique, deterministic inkblot pattern that can be used as NFT art.
+A generative art project that creates deterministic, particle-based Rorschach inkblots from Ethereum addresses. Each address produces a unique, inkblot pattern + color combination along with trait extraction for NFT metadata.
 
-## Features
+## Traits
 
-- **Particle-Based Generation**: Creates beautiful organic patterns from thousands of small particles
-- **Ethereum Address Integration**: Deterministic generation based on address features
-- **Perfect Symmetry**: Creates the classic Rorschach "butterfly" pattern
-- **Color Schemes**: Multiple color options derived from address characteristics
-- **NFT-Ready**: Automatic trait extraction for NFT metadata
-- **High Quality**: Renders clean, high-resolution images
+Various aspects of an Ethereum address will result in different traits that alter the particle generation.
+
+- **Uniqueness**: Addresses with low repetition in their characters produce more variable particle sizes.
+- **Palindrome**: If the end of an address is a palindrome, the pattern repeats from the edges and center.
+- **420 Special**: Addresses that start or end with '420' produce a unique green color pairing and cannabis leaf shaped pattern.
+- **Zeroes**: The more consecutive zeroes an address has, the lower the particle density.
+
+### TODO: add more traits
 
 ## Installation
 
@@ -49,9 +51,10 @@ The generator will automatically save metadata to `output/metadata/` directory.
 ### Parameters
 
 - `--ethAddress`: Ethereum address for deterministic generation
-- `--size`: Canvas size in pixels (default: 800)
+- `--size`: Canvas size in pixels (default: 1024)
 - `--outputPath`: Path for saving the output image
 - `--test`: Run a single address and save to test.png
+- `--examples`: Generate example inkblots for multiple predefined addresses
 
 The generator automatically determines optimal parameters based on the Ethereum address:
 
@@ -65,11 +68,7 @@ The generator automatically determines optimal parameters based on the Ethereum 
 To generate multiple examples from different Ethereum addresses:
 
 ```bash
-// run a single example generation
-node index.js --example
-
-// run batch examples generation
-node index.js --examples
+node src/cli.js --examples
 ```
 
 This will generate:
@@ -81,22 +80,12 @@ This will generate:
 
 Infinite Inkblots uses a particle-based animation approach to create Rorschach-like patterns:
 
-1. **Ethereum Address Analysis**: The system extracts unique features from the address
-2. **Parameter Mapping**: These features influence visual aspects like color, density, and detail
-3. **Progressive Generation**: Particles are added frame by frame with a fade effect
-4. **Symmetry Application**: Perfect mirroring creates the classic Rorschach look
-5. **Trait Extraction**: NFT metadata is derived from the generation parameters
+1. **Ethereum Address Analysis**: Extract unique features from the address
+2. **Parameter Mapping**: The features influence visual aspects like color, density, and detail
+3. **Progressive Generation**: Particles are added frame by frame with a fade effect, then mirrored to produce the classic Rorschach pattern
+4. **Trait Extraction**: NFT metadata is derived and saved
 
-## Example Outputs
-
-Different Ethereum addresses produce distinctly different inkblots:
-
-- Zero address (0x000...): Tends to create very symmetrical, structured patterns
-- Addresses with many repeating characters: Creates more uniform, consistent patterns
-- Addresses with high character diversity: Produces more complex, detailed patterns
-- Specific character distributions: Influences color and density distributions
-
-### NFT Integration
+### Metadata
 
 The generator automatically extracts traits for NFT metadata and saves them to `output/metadata/`:
 
@@ -112,7 +101,27 @@ The generator automatically extracts traits for NFT metadata and saves them to `
     },
     {
       "trait_type": "Size",
-      "value": "800x800"
+      "value": "1024x1024"
+    },
+    {
+      "trait_type": "ColorScheme",
+      "value": "The Blues"
+    },
+    {
+      "trait_type": "PrimaryColor",
+      "value": "#0000FF"
+    },
+    {
+      "trait_type": "SecondaryColor",
+      "value": "#000080"
+    },
+    {
+      "trait_type": "Complexity",
+      "value": "Medium"
+    },
+    {
+      "trait_type": "Pattern",
+      "value": "Standard"
     }
   ]
 }
@@ -125,7 +134,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ### todo
 
 - [x] rename the color pairs
-- [ ] make some more patterns!
+- [ ] make some more patterns
 - [ ] tweak 420 pattern to look more leaf-like
 - [ ] switch current high-zero pattern to be for palindromes
 - [ ] create new high-zero pattern that uses lighter/smaller/less dense particles
