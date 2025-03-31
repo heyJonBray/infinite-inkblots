@@ -1,10 +1,25 @@
 /**
+ * Particle generation utilities that handles the various types of particle
+ * patterns.
+ *
+ * @func generateSymmetricalParticle: Creates the standard symmetrical distribution
+ * @func generateInvertedSymmetricalParticle: Creates the "inverted" symmetrical distribution
+ * @func generateStarSymmetricalParticle: Creates the pattern for 420 addresses
+ */
+
+const PARTICLE_CONSTANTS = {
+  SEED_MULTIPLIER: 1000000,
+  MAX_ATTEMPTS: 10,
+};
+
+/**
  * Initialize a seeded random number generator
  * @param {number} seed - Seed value
  * @returns {Function} Seeded random function
  */
 function createSeededRandom(seed) {
-  let seedValue = seed || Math.floor(Math.random() * 1000000);
+  let seedValue =
+    seed || Math.floor(Math.random() * PARTICLE_CONSTANTS.SEED_MULTIPLIER);
 
   return function () {
     const x = Math.sin(seedValue++) * 10000;
@@ -198,12 +213,15 @@ function createSymmetricalParticle(
     const acceptanceProbability = Math.pow(1 - weightedDist, 4);
 
     // Accept the particle based on its weighted distance from center
-    if (seededRandom() < acceptanceProbability || attempts > 10) {
+    if (
+      seededRandom() < acceptanceProbability ||
+      attempts > PARTICLE_CONSTANTS.MAX_ATTEMPTS
+    ) {
       break;
     }
 
     attempts++;
-  } while (attempts <= 10); // Give up after 10 attempts to avoid infinite loops
+  } while (attempts <= PARTICLE_CONSTANTS.MAX_ATTEMPTS); // Give up after 10 attempts to avoid infinite loops
 
   // Create the mirrored point for perfect bilateral symmetry
   const mirrorX = size - x;
@@ -264,12 +282,15 @@ function createInvertedSymmetricalParticle(
     const acceptanceProbability = linearFalloff * 0.7 + circularFalloff * 0.3;
 
     // Accept the particle based on its distance from center
-    if (seededRandom() < acceptanceProbability || attempts > 10) {
+    if (
+      seededRandom() < acceptanceProbability ||
+      attempts > PARTICLE_CONSTANTS.MAX_ATTEMPTS
+    ) {
       break;
     }
 
     attempts++;
-  } while (attempts <= 10); // Give up after 10 attempts to avoid infinite loops
+  } while (attempts <= PARTICLE_CONSTANTS.MAX_ATTEMPTS); // Give up after 10 attempts to avoid infinite loops
 
   // Create the mirrored point for perfect bilateral symmetry
   const mirrorX = size - x;
@@ -338,12 +359,15 @@ function createStarSymmetricalParticle(
       asymmetry * 0.1; // Asymmetry for organic feel
 
     // Accept the particle based on the combined pattern
-    if (seededRandom() < acceptanceProbability || attempts > 10) {
+    if (
+      seededRandom() < acceptanceProbability ||
+      attempts > PARTICLE_CONSTANTS.MAX_ATTEMPTS
+    ) {
       break;
     }
 
     attempts++;
-  } while (attempts <= 10); // Give up after 10 attempts to avoid infinite loops
+  } while (attempts <= PARTICLE_CONSTANTS.MAX_ATTEMPTS); // Give up after 10 attempts to avoid infinite loops
 
   // Create the mirrored point for perfect bilateral symmetry
   const mirrorX = size - x;

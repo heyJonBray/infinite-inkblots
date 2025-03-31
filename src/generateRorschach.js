@@ -1,6 +1,15 @@
-// Particle-Based Rorschach Generator
-// Creates Rorschach-style inkblots using particles and noise fields
-// Takes inspiration from both the original P5.js sketch and the Python implementation
+/**
+ * Rorschach inkblot generator
+ * Generates deterministic Rorschach-style inkblots based on Ethereum addresses
+ *
+ * @module generateRorschach
+ * @requires config
+ * @requires utils/particleUtils
+ * @requires utils/renderUtils
+ * @requires utils/ethUtils
+ * @requires utils/colors
+ */
+
 const { defaultParams } = require('./config');
 const {
   createSeededRandom,
@@ -11,12 +20,12 @@ const {
   createStarSymmetricalParticle,
 } = require('./utils/particleUtils');
 const { renderRorschach } = require('./utils/renderUtils');
-const { createCanvas } = require('canvas');
 const {
   extractEthFeatures,
   customizeParamsFromEthFeatures,
 } = require('./utils/ethUtils');
 const { getColorSchemeFromEthFeatures } = require('./utils/colors');
+const { createCanvas } = require('canvas');
 
 /**
  * Generate Rorschach inkblot using particle-based approach

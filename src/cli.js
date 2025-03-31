@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { generateParticleRorschach } = require('./rorschach');
+const { generateParticleRorschach } = require('./generateRorschach');
 const { extractEthFeatures } = require('./utils/ethUtils');
 const { getColorSchemeFromEthFeatures } = require('./utils/colors');
 
