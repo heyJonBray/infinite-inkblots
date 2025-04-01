@@ -7,10 +7,7 @@
  * @func generateStarSymmetricalParticle: Creates the pattern for 420 addresses
  */
 
-const PARTICLE_CONSTANTS = {
-  SEED_MULTIPLIER: 1000000,
-  MAX_ATTEMPTS: 10,
-};
+const config = require('../config');
 
 /**
  * Initialize a seeded random number generator
@@ -19,7 +16,7 @@ const PARTICLE_CONSTANTS = {
  */
 function createSeededRandom(seed) {
   let seedValue =
-    seed || Math.floor(Math.random() * PARTICLE_CONSTANTS.SEED_MULTIPLIER);
+    seed || Math.floor(Math.random() * config.particleParams.SEED_MULTIPLIER);
 
   return function () {
     const x = Math.sin(seedValue++) * 10000;
@@ -38,8 +35,9 @@ function createNoiseFunction(seededRandom) {
 
   // Permutation table
   const perm = Array(512);
-  for (let i = 0; i < 256; i++) {
-    perm[i] = perm[i + 256] = Math.floor(seededRandom() * 256);
+  for (let i = 0; i < config.particleParams.noise.PERMUTATION_SIZE; i++) {
+    perm[i] = perm[i + config.particleParams.noise.PERMUTATION_SIZE] =
+      Math.floor(seededRandom() * config.particleParams.noise.PERMUTATION_SIZE);
   }
 
   // Fade function for smoother interpolation
@@ -63,7 +61,11 @@ function createNoiseFunction(seededRandom) {
   // Return noise function
   return function (x, y, z = 0) {
     // Create a cache key
-    const key = `${x.toFixed(4)},${y.toFixed(4)},${z.toFixed(4)}`;
+    const key = `${x.toFixed(
+      config.particleParams.noise.CACHE_PRECISION
+    )},${y.toFixed(config.particleParams.noise.CACHE_PRECISION)},${z.toFixed(
+      config.particleParams.noise.CACHE_PRECISION
+    )}`;
 
     // Return cached value if available
     if (noiseCache[key] !== undefined) {
@@ -134,8 +136,10 @@ function getPlotter(value, colors, maxRadius) {
   const n = colors.length;
 
   // Use a non-linear mapping to better distribute colors
-  // This will make middle colors more likely to appear
-  const mappedValue = Math.pow(value, 1.5); // Adjust this power to control distribution
+  const mappedValue = Math.pow(
+    value,
+    config.particleParams.plotter.COLOR_DISTRIBUTION_POWER
+  );
 
   // Size of an interval
   const size = 1 / n;
@@ -145,13 +149,22 @@ function getPlotter(value, colors, maxRadius) {
   const valueInInterval = (mappedValue * n) % 1;
 
   // Enhanced radius calculation with more variety
-  // Use a combination of noise-based variation and position-based scaling
-  const center = 0.5;
+  const center = config.particleParams.plotter.RADIUS_CENTER;
   const radiusScale = 2 * (center - Math.abs(valueInInterval - center));
 
   // Add some randomness to the radius while maintaining the overall structure
-  const noiseVariation = Math.pow(Math.sin(valueInInterval * Math.PI * 4), 2);
-  const enhancedRadiusScale = radiusScale * (0.7 + 0.3 * noiseVariation);
+  const noiseVariation = Math.pow(
+    Math.sin(
+      valueInInterval *
+        Math.PI *
+        config.particleParams.plotter.RADIUS_NOISE_FREQUENCY
+    ),
+    2
+  );
+  const enhancedRadiusScale =
+    radiusScale *
+    (config.particleParams.plotter.RADIUS_BASE_SCALE +
+      config.particleParams.plotter.RADIUS_VARIATION_SCALE * noiseVariation);
 
   return {
     color: colors[Math.min(index, colors.length - 1)],
@@ -204,24 +217,26 @@ function createSymmetricalParticle(
     const dy = Math.abs(y - centerY) / (size / 2);
 
     // weight the distances differently
-    // higher weight for horizontal distance (more spread out)
-    // lower weight for vertical distance (tighter distribution)
-    const weightedDist = dx * 0.7 + dy * 0.3;
+    const weightedDist =
+      dx * config.particleParams.distribution.HORIZONTAL_WEIGHT +
+      dy * config.particleParams.distribution.VERTICAL_WEIGHT;
 
     // acceptance probability: higher near center, lower near edges
-    // using a higher exponent (4) for more dramatic falloff
-    const acceptanceProbability = Math.pow(1 - weightedDist, 4);
+    const acceptanceProbability = Math.pow(
+      1 - weightedDist,
+      config.particleParams.distribution.DISTANCE_FALLOFF_POWER
+    );
 
     // accept the particle based on its weighted distance from center
     if (
       seededRandom() < acceptanceProbability ||
-      attempts > PARTICLE_CONSTANTS.MAX_ATTEMPTS
+      attempts > config.particleParams.MAX_ATTEMPTS
     ) {
       break;
     }
 
     attempts++;
-  } while (attempts <= PARTICLE_CONSTANTS.MAX_ATTEMPTS);
+  } while (attempts <= config.particleParams.MAX_ATTEMPTS);
 
   // create the mirrored point for perfect bilateral symmetry
   const mirrorX = size - x;
@@ -279,18 +294,20 @@ function createInvertedSymmetricalParticle(
     );
 
     // weight the falloffs to create a natural transition
-    const acceptanceProbability = linearFalloff * 0.7 + circularFalloff * 0.3;
+    const acceptanceProbability =
+      linearFalloff * config.particleParams.inverted.LINEAR_FALLOFF_WEIGHT +
+      circularFalloff * config.particleParams.inverted.CIRCULAR_FALLOFF_WEIGHT;
 
     // accept the particle based on its distance from center
     if (
       seededRandom() < acceptanceProbability ||
-      attempts > PARTICLE_CONSTANTS.MAX_ATTEMPTS
+      attempts > config.particleParams.MAX_ATTEMPTS
     ) {
       break;
     }
 
     attempts++;
-  } while (attempts <= PARTICLE_CONSTANTS.MAX_ATTEMPTS);
+  } while (attempts <= config.particleParams.MAX_ATTEMPTS);
 
   // create the mirrored point for perfect bilateral symmetry
   const mirrorX = size - x;
@@ -345,31 +362,39 @@ function createStarSymmetricalParticle(
 
     // create 3.5-pointed leaf pattern (7 points total when mirrored)
     // use different frequencies to create more organic variation
-    const mainPoints = Math.pow(Math.sin(angle * 3.5), 2); // main 3.5 points per side
-    const subPoints = Math.pow(Math.sin(angle * 7), 2) * 0.5; // sub-points for texture
-    const leafPattern = mainPoints * 0.7 + subPoints * 0.3;
+    const mainPoints = Math.pow(
+      Math.sin(angle * config.particleParams.star.POINTS),
+      2
+    );
+    const subPoints =
+      Math.pow(Math.sin(angle * config.particleParams.star.SUBPOINTS), 2) * 0.5;
+    const leafPattern =
+      mainPoints * config.particleParams.star.MAIN_POINTS_WEIGHT +
+      subPoints * config.particleParams.star.SUBPOINTS_WEIGHT;
 
     // add some asymmetry to make it more leaf-like
-    const asymmetry = Math.sin(angle * 1.75) * 0.2; // creates slight asymmetry in the lobes
+    const asymmetry =
+      Math.sin(angle * config.particleParams.star.ASYMMETRY_FREQUENCY) *
+      config.particleParams.star.ASYMMETRY_SCALE;
 
     // combine patterns with weights
     const acceptanceProbability =
-      radialFalloff * 0.5 + // base radial distribution
-      leafPattern * 0.4 + // main leaf pattern
-      asymmetry * 0.1; // asymmetry for organic feel
+      radialFalloff * config.particleParams.star.RADIAL_WEIGHT +
+      leafPattern * config.particleParams.star.PATTERN_WEIGHT +
+      asymmetry * config.particleParams.star.ASYMMETRY_WEIGHT;
 
     // accept the particle based on the combined pattern
     if (
       seededRandom() < acceptanceProbability ||
-      attempts > PARTICLE_CONSTANTS.MAX_ATTEMPTS
+      attempts > config.particleParams.MAX_ATTEMPTS
     ) {
       break;
     }
 
     attempts++;
-  } while (attempts <= PARTICLE_CONSTANTS.MAX_ATTEMPTS);
+  } while (attempts <= config.particleParams.MAX_ATTEMPTS);
 
-  // create the mirrored point for perfect bilateral symmetry
+  // create the mirrored point for bilateral symmetry
   const mirrorX = size - x;
 
   return {
@@ -378,7 +403,6 @@ function createStarSymmetricalParticle(
   };
 }
 
-// export all the particle-related functions
 module.exports = {
   createSeededRandom,
   createNoiseFunction,

@@ -1,3 +1,5 @@
+const config = require('../config');
+
 /**
  * Converts HSL color to RGB
  * @param {number} h - Hue (0-360)
@@ -6,7 +8,7 @@
  * @return {number[]} RGB values as [r, g, b] (0-255)
  */
 function hslToRgb(h, s, l) {
-  h /= 360;
+  h /= config.colorTheory.space.HUE_MAX;
   let r, g, b;
 
   if (s === 0) {
@@ -29,7 +31,11 @@ function hslToRgb(h, s, l) {
     b = hue2rgb(p, q, h - 1 / 3);
   }
 
-  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+  return [
+    Math.round(r * config.colorTheory.space.RGB_MAX),
+    Math.round(g * config.colorTheory.space.RGB_MAX),
+    Math.round(b * config.colorTheory.space.RGB_MAX),
+  ];
 }
 
 /**
@@ -96,24 +102,26 @@ function adjustInRange(value, adjustment, min, max) {
  * @return {Object} HSL color values
  */
 function generatePrimaryColor(address) {
-  // Remove '0x' prefix if present
   const cleanAddress = address.startsWith('0x')
     ? address.substring(2).toLowerCase()
     : address.toLowerCase();
 
-  // Use different segments of the address for different HSL components
-
-  // Use first 3 chars for hue (0-360)
   const hueSegment = cleanAddress.substring(0, 3);
-  const hue = parseInt(hueSegment, 16) % 360;
+  const hue = parseInt(hueSegment, 16) % config.colorTheory.space.HUE_MAX;
 
-  // Use next 2 chars for saturation (40-100%)
   const satSegment = cleanAddress.substring(3, 5);
-  const saturation = 0.4 + (parseInt(satSegment, 16) % 60) / 100;
+  const saturation =
+    config.colorTheory.primary.SATURATION_MIN +
+    (parseInt(satSegment, 16) %
+      (config.colorTheory.primary.SATURATION_RANGE * 100)) /
+      100;
 
-  // Use next 2 chars for lightness (35-75%)
   const lightSegment = cleanAddress.substring(5, 7);
-  const lightness = 0.35 + (parseInt(lightSegment, 16) % 40) / 100;
+  const lightness =
+    config.colorTheory.primary.LIGHTNESS_MIN +
+    (parseInt(lightSegment, 16) %
+      (config.colorTheory.primary.LIGHTNESS_RANGE * 100)) /
+      100;
 
   return { hue, saturation, lightness };
 }
@@ -141,27 +149,8 @@ function determineColorRelationship(ethFeatures) {
     return 'SEPIA';
   }
 
-  // Use palindrome detection for complementary colors
-  if (ethFeatures.isPalindrome) {
-    return 'COMPLEMENTARY';
-  }
-
-  // Use diversity score to influence relationship choice
-  if (ethFeatures.diversity > 0.7) {
-    return 'SPLIT_COMPLEMENTARY'; // High diversity suggests more contrast
-  } else if (ethFeatures.diversity < 0.3) {
-    return 'ANALOGOUS_ACCENT'; // Low diversity suggests more subtle relationship
-  }
-
-  // Use the seed for deterministic relationship selection for remaining cases
-  const relationships = [
-    'COMPLEMENTARY',
-    'ANALOGOUS',
-    'SPLIT_COMPLEMENTARY',
-    'ANALOGOUS_ACCENT',
-  ];
-
-  return relationships[ethFeatures.seed % relationships.length];
+  // Use the seed for deterministic relationship selection
+  return 'ANALOGOUS';
 }
 
 /**
@@ -175,91 +164,85 @@ function generateSecondaryColor(primaryHsl, relationship, ethFeatures) {
   const { hue, saturation, lightness } = primaryHsl;
   let secondaryHue, secondarySat, secondaryLight;
 
-  // Variation factor based on address to make each secondary color unique
   const variationSeed = parseInt(ethFeatures.address.substring(8, 12), 16);
-  const variationFactor = (variationSeed % 20) / 100; // 0-0.2 variation
+  const variationFactor =
+    (variationSeed % (config.colorTheory.secondary.VARIATION_RANGE * 100)) /
+    100;
 
   switch (relationship) {
     case 'SPECIAL_420':
-      // Create a special green pair for 420 reference
       return {
-        hue: 120, // Green
-        saturation: 0.6 + variationFactor,
-        lightness: 0.3 + variationFactor,
+        hue: config.colorTheory.special['420'].HUE,
+        saturation: config.colorTheory.special['420'].SAT + variationFactor,
+        lightness: config.colorTheory.special['420'].LIGHT + variationFactor,
       };
 
     case 'MONOCHROMATIC':
-      // Same hue, different lightness/saturation
       secondaryHue = hue;
-      secondarySat = 0.1; // Low saturation for grey tones
-      secondaryLight = 0.25; // Darker for grey
+      secondarySat = config.colorTheory.special.MONOCHROME.SAT;
+      secondaryLight = config.colorTheory.special.MONOCHROME.LIGHT;
       break;
 
     case 'SEPIA':
-      // Warm earth-tone colors
-      secondaryHue = 30; // Sepia/brown hue
-      secondarySat = 0.6 - variationFactor;
-      secondaryLight = 0.4 + variationFactor;
-      break;
-
-    case 'COMPLEMENTARY':
-      // Opposite on the color wheel
-      secondaryHue = (hue + 180) % 360;
-      secondarySat = saturation;
-      secondaryLight = adjustInRange(
-        lightness,
-        -0.1 + variationFactor,
-        0.25,
-        0.75
-      );
+      secondaryHue = config.colorTheory.special.SEPIA.HUE;
+      secondarySat = config.colorTheory.special.SEPIA.SAT - variationFactor;
+      secondaryLight = config.colorTheory.special.SEPIA.LIGHT + variationFactor;
       break;
 
     case 'ANALOGOUS':
-      // Adjacent on the color wheel
-      secondaryHue = (hue + 30 + Math.floor(variationFactor * 15)) % 360;
-      secondarySat = adjustInRange(
-        saturation,
-        -0.05 + variationFactor,
-        0.3,
-        0.9
-      );
-      secondaryLight = adjustInRange(
-        lightness,
-        -0.1 + variationFactor,
-        0.3,
-        0.7
-      );
-      break;
+      secondaryHue =
+        (hue +
+          config.colorTheory.secondary.ANALOGOUS_HUE_OFFSET +
+          Math.floor(variationFactor * 10)) %
+        config.colorTheory.space.HUE_MAX;
 
-    case 'SPLIT_COMPLEMENTARY':
-      // Complementary with an offset
-      secondaryHue = (hue + 150 + Math.floor(variationFactor * 30)) % 360;
-      secondarySat = adjustInRange(saturation, -0.1 + variationFactor, 0.4, 1);
-      secondaryLight = adjustInRange(
-        lightness,
-        -0.1 + variationFactor,
-        0.3,
-        0.7
-      );
-      break;
-
-    case 'ANALOGOUS_ACCENT':
-      // Analogous with more contrast
-      secondaryHue = (hue + 45 + Math.floor(variationFactor * 20)) % 360;
-      secondarySat = adjustInRange(saturation, 0.1 + variationFactor, 0, 1);
-      secondaryLight = adjustInRange(
-        lightness,
-        -0.15 + variationFactor,
-        0.25,
-        0.75
-      );
+      if (
+        saturation > config.colorTheory.secondary.VIBRANT_SATURATION_THRESHOLD
+      ) {
+        secondarySat = adjustInRange(
+          saturation,
+          -0.1 + variationFactor,
+          config.colorTheory.secondary.VIBRANT.SAT_MIN,
+          config.colorTheory.secondary.VIBRANT.SAT_MAX
+        );
+        secondaryLight = adjustInRange(
+          lightness,
+          -0.2 + variationFactor,
+          config.colorTheory.secondary.VIBRANT.LIGHT_MIN,
+          config.colorTheory.secondary.VIBRANT.LIGHT_MAX
+        );
+      } else {
+        secondarySat = adjustInRange(
+          saturation,
+          0.05 + variationFactor,
+          config.colorTheory.secondary.BALANCED.SAT_MIN,
+          config.colorTheory.secondary.BALANCED.SAT_MAX
+        );
+        secondaryLight = adjustInRange(
+          lightness,
+          -0.1 + variationFactor,
+          config.colorTheory.secondary.BALANCED.LIGHT_MIN,
+          config.colorTheory.secondary.BALANCED.LIGHT_MAX
+        );
+      }
       break;
 
     default:
-      // Fallback
-      secondaryHue = (hue + 60) % 360;
-      secondarySat = saturation;
-      secondaryLight = lightness;
+      secondaryHue =
+        (hue + config.colorTheory.secondary.ANALOGOUS_HUE_OFFSET) %
+        config.colorTheory.space.HUE_MAX;
+      secondarySat = adjustInRange(
+        saturation,
+        0,
+        config.colorTheory.secondary.BALANCED.SAT_MIN,
+        config.colorTheory.secondary.BALANCED.SAT_MAX
+      );
+      secondaryLight = adjustInRange(
+        lightness,
+        0,
+        config.colorTheory.secondary.BALANCED.LIGHT_MIN,
+        config.colorTheory.secondary.BALANCED.LIGHT_MAX
+      );
   }
 
   return {
@@ -278,28 +261,37 @@ function generateSecondaryColor(primaryHsl, relationship, ethFeatures) {
 function generateColorName(rgb, hsl) {
   const { hue, saturation, lightness } = hsl;
 
-  // Get base hue name
   let hueName = '';
-  if (hue < 15 || hue >= 345) hueName = 'Red';
-  else if (hue < 45) hueName = 'Orange';
-  else if (hue < 75) hueName = 'Yellow';
-  else if (hue < 165) hueName = 'Green';
-  else if (hue < 195) hueName = 'Teal';
-  else if (hue < 255) hueName = 'Blue';
-  else if (hue < 285) hueName = 'Indigo';
-  else if (hue < 345) hueName = 'Purple';
+  if (
+    hue < config.colorTheory.hueRanges.ORANGE.min ||
+    hue >= config.colorTheory.hueRanges.RED.min
+  )
+    hueName = 'Red';
+  else if (hue < config.colorTheory.hueRanges.YELLOW.min) hueName = 'Orange';
+  else if (hue < config.colorTheory.hueRanges.GREEN.min) hueName = 'Yellow';
+  else if (hue < config.colorTheory.hueRanges.TEAL.min) hueName = 'Green';
+  else if (hue < config.colorTheory.hueRanges.BLUE.min) hueName = 'Teal';
+  else if (hue < config.colorTheory.hueRanges.INDIGO.min) hueName = 'Blue';
+  else if (hue < config.colorTheory.hueRanges.PURPLE.min) hueName = 'Indigo';
+  else if (hue < config.colorTheory.hueRanges.RED.min) hueName = 'Purple';
 
-  // Get lightness/saturation modifier
   let modifier = '';
-  if (lightness < 0.2) modifier = 'Dark';
-  else if (lightness > 0.8) modifier = 'Light';
-  else if (saturation < 0.3) modifier = 'Muted';
-  else if (saturation > 0.8) modifier = 'Vibrant';
+  if (lightness < config.colorTheory.naming.DARK_LIGHTNESS) modifier = 'Dark';
+  else if (lightness > config.colorTheory.naming.LIGHT_LIGHTNESS)
+    modifier = 'Light';
+  else if (saturation < config.colorTheory.naming.MUTED_SATURATION)
+    modifier = 'Muted';
+  else if (
+    saturation > config.colorTheory.secondary.VIBRANT_SATURATION_THRESHOLD
+  )
+    modifier = 'Vibrant';
 
-  // Special colors for nearly black, white, or gray
-  if (lightness < 0.1) return 'Deep ' + hueName;
-  if (lightness > 0.9) return 'Pale ' + hueName;
-  if (saturation < 0.1) return `${Math.round(lightness * 100)}% Gray`;
+  if (lightness < config.colorTheory.naming.DEEP_LIGHTNESS)
+    return 'Deep ' + hueName;
+  if (lightness > config.colorTheory.naming.PALE_LIGHTNESS)
+    return 'Pale ' + hueName;
+  if (saturation < config.colorTheory.naming.MUTED_SATURATION)
+    return `${Math.round(lightness * 100)}% Gray`;
 
   return modifier ? `${modifier} ${hueName}` : hueName;
 }
@@ -311,10 +303,7 @@ function generateColorName(rgb, hsl) {
  */
 function generateRelationshipName(relationship) {
   const names = {
-    COMPLEMENTARY: 'Contrast',
     ANALOGOUS: 'Harmony',
-    SPLIT_COMPLEMENTARY: 'Balance',
-    ANALOGOUS_ACCENT: 'Accent',
     SPECIAL_420: '420 Special',
     MONOCHROMATIC: 'Monochrome',
     SEPIA: 'Sepia',
