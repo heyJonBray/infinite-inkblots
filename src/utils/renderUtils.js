@@ -2,13 +2,7 @@
  * Rendering utilities for particle generation
  */
 
-const RENDER_CONSTANTS = {
-  MIN_PARTICLE_SIZE_RATIO: 0.1,
-  EDGE_FALLOFF_FACTOR: 0.8,
-  EDGE_NOISE_MULTIPLIER: 0.4,
-  DISTANCE_CENTER_WEIGHT: 0.5,
-  EDGE_NOISE_FREQUENCY: 8,
-};
+const config = require('../config');
 
 /**
  * Initialize the canvas with white background
@@ -61,7 +55,7 @@ function calculateDistanceFromCenter(x, y, centerX, centerY, size) {
 function calculateAdjustedNoiseValue(noiseValue, distanceFromCenter) {
   return (
     noiseValue *
-    (1 - distanceFromCenter * RENDER_CONSTANTS.DISTANCE_CENTER_WEIGHT)
+    (1 - distanceFromCenter * config.renderParams.DISTANCE_CENTER_WEIGHT)
   );
 }
 
@@ -75,12 +69,13 @@ function calculateAdjustedNoiseValue(noiseValue, distanceFromCenter) {
 function calculateParticleRadius(baseRadius, distanceFromCenter, maxRadius) {
   // edge factor for organic particle falloff
   const edgeFactor = Math.pow(distanceFromCenter, 2);
-  const sizeVariation = 1 - edgeFactor * RENDER_CONSTANTS.EDGE_FALLOFF_FACTOR;
+  const sizeVariation =
+    1 - edgeFactor * config.renderParams.EDGE_FALLOFF_FACTOR;
 
   // add randomness to edges
   const edgeNoise = Math.pow(
     Math.sin(
-      distanceFromCenter * Math.PI * RENDER_CONSTANTS.EDGE_NOISE_FREQUENCY
+      distanceFromCenter * Math.PI * config.renderParams.EDGE_NOISE_FREQUENCY
     ),
     2
   );
@@ -88,13 +83,12 @@ function calculateParticleRadius(baseRadius, distanceFromCenter, maxRadius) {
   const organicRadius =
     baseRadius *
     (sizeVariation *
-      (0.6 + RENDER_CONSTANTS.EDGE_NOISE_MULTIPLIER * edgeNoise));
+      (0.6 + config.renderParams.EDGE_NOISE_MULTIPLIER * edgeNoise));
 
   // ensure minimum particle size
-  // @todo revisit minimum size and consider making smaller and more frequent for better detail
   return Math.max(
     organicRadius,
-    maxRadius * RENDER_CONSTANTS.MIN_PARTICLE_SIZE_RATIO
+    maxRadius * config.renderParams.MIN_PARTICLE_SIZE_RATIO
   );
 }
 
@@ -253,7 +247,7 @@ function renderRorschach(canvasLib, params, state) {
 }
 
 module.exports = {
-  RENDER_CONSTANTS,
+  RENDER_CONSTANTS: config.renderParams,
   initializeCanvas,
   fadeCanvas,
   calculateDistanceFromCenter,

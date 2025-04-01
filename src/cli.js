@@ -128,17 +128,17 @@ function generateMetadata(
         value: `${size}x${size}`,
       },
       {
-        trait_type: 'ColorScheme',
+        trait_type: 'Color Relationship',
         value: colorScheme.is420Address
           ? '420 Special'
           : colorScheme.colorPairName,
       },
       {
-        trait_type: 'PrimaryColor',
+        trait_type: 'Primary Color',
         value: colorScheme.primaryColor,
       },
       {
-        trait_type: 'SecondaryColor',
+        trait_type: 'Secondary Color',
         value: colorScheme.secondaryColor,
       },
       {

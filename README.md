@@ -1,144 +1,134 @@
 # Infinite Inkblots
 
-A generative art project that creates deterministic, particle-based Rorschach inkblots from Ethereum addresses. Each address produces a unique, inkblot pattern + color combination along with trait extraction for NFT metadata.
+A generative art system that creates unique, deterministic Rorschach-style inkblots from Ethereum addresses for NFTs. Each address produces a consistent, reproducible particle-based image.
 
-## Traits
+## Features
 
-Various aspects of an Ethereum address will result in different traits that alter the particle generation.
+- **Deterministic Generation**: Same Ethereum address always produces the same inkblot
+- **Particle-Based Animation**: Thousands of small circles create organic, symmetrical patterns
+- **Color Theory Integration**: Colors are derived from address characteristics
+- **NFT-Ready**: Includes metadata generation and trait extraction
+- **Special Cases**: Unique patterns for addresses containing "420" or with repeating characters
 
-- **Uniqueness**: Addresses with low repetition in their characters produce more variable particle sizes.
-- **Palindrome**: If the end of an address is a palindrome, the pattern repeats from the edges and center.
-- **420 Special**: Addresses that start or end with '420' produce a unique green color pairing and cannabis leaf shaped pattern.
-- **Repeating Characters**: A large number of repeating characters (like in vanity addresses) get different color schemes:
-  - **Zeroes**: monochrome
-  - **Letters**: sepia
+## Color Theory
+
+The system uses color theory to create harmonious color combinations based on Ethereum address characteristics:
+
+### Color Generation
+
+- Primary color is derived from the first 7 characters of the address
+  - First 3 characters determine the base hue (0-360°)
+  - Next 2 characters set saturation (70-90%)
+  - Next 2 characters control lightness (40-70%)
+
+### Color Relationships
+
+The system creates color pairs using the following relationships:
+
+1. **Harmony (Adjacent Colors)**
+
+   - Default relationship for most addresses
+   - Colors are 20° apart on the color wheel
+   - High saturation (70-90%) for vibrant combinations
+   - Balanced lightness (40-70%) for optimal contrast
+
+2. **Special Cases**
+   - **420 Special**: Green color pair for addresses containing "420"
+   - **Monochrome**: Low-saturation grayscale for addresses with repeating zeros
+   - **Sepia**: Warm earth tones for addresses with repeating non-zero characters
+
+### Color Naming
+
+Colors are named based on their position on the color wheel and their properties:
+
+- Base colors: Red, Orange, Yellow, Green, Teal, Blue, Indigo, Purple
+- Modifiers: Dark, Light, Muted, Vibrant
+- Special cases: Deep, Pale, Gray percentages
 
 ## Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/heyjonbray/infinite-inkblots.git
-cd infinite-inkblots
-
-# Install dependencies
 npm install
 ```
 
-### Requirements
-
-- Node.js (v14 or higher)
-- The only dependency is the `canvas` package
-
 ## Usage
 
-### Basic Usage
+### Command Line
 
 ```bash
-node index.js --ethAddress 0x7e2F9dd040cF7B41a1AF9e4A24A0EDB04093dDa1
+node index.js --ethAddress 0x123... --size 800 --outputPath output.png
 ```
 
-### Advanced Options
-
-```bash
-node index.js \
-  --ethAddress 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4 \
-  --size 1200 \
-  --outputPath output/custom_name.png
-```
-
-The generator will automatically save metadata to `output/metadata/` directory.
-
-### Parameters
+Options:
 
 - `--ethAddress`: Ethereum address for deterministic generation
-- `--size`: Canvas size in pixels (default: 1024)
+- `--size`: Canvas size in pixels (default: 800)
 - `--outputPath`: Path for saving the output image
-- `--test`: Run a single address and save to test.png
-- `--examples`: Generate example inkblots for multiple predefined addresses
+- `--particleCount`: Number of particles per frame
+- `--runDuration`: Number of frames to generate
+- `--saveMetadata`: Flag to save NFT metadata
+- `--examples`: Generate predefined example inkblots
 
-The generator automatically determines optimal parameters based on the Ethereum address:
-
-- Particle count: 50-100 particles per frame
-- Frames to render: 50-200 frames
-- Color scheme: Based on address diversity and character distribution
-- Pattern detail: Based on address complexity
-
-### Batch Generation
-
-To generate multiple examples from different Ethereum addresses:
+You can also generate images for 50 random addresses to get a feel for what the inkblots look like in the wild:
 
 ```bash
-node src/cli.js --examples
+node src/testAddresses.js
 ```
 
-This will generate:
+### API
 
-- Images in `output/examples/`
-- Metadata files in `output/examples/metadata/`
+```javascript
+const { generateInkblot } = require('./src/generateRorschach');
 
-## How It Works
+const result = await generateInkblot({
+  ethAddress: '0x123...',
+  size: 800,
+  outputPath: 'output.png',
+  saveMetadata: true,
+});
+```
 
-Infinite Inkblots uses a particle-based animation approach to create Rorschach-like patterns:
+## NFT Integration
 
-1. **Ethereum Address Analysis**: Extract unique features from the address
-2. **Parameter Mapping**: The features influence visual aspects like color, density, and detail
-3. **Progressive Generation**: Particles are added frame by frame with a fade effect, then mirrored to produce the classic Rorschach pattern
-4. **Trait Extraction**: NFT metadata is derived and saved
-
-### Metadata
-
-The generator automatically extracts traits for NFT metadata and saves them to `output/metadata/`:
+The generator creates metadata in standard NFT format:
 
 ```json
 {
   "name": "Infinite Inkblot 0x5B38Da6a",
   "description": "A unique Rorschach-style inkblot generated from an Ethereum address",
-  "image": "particle_ror_0x5B38Da6a701c568545dCfcB03FcB875f56beddC4.png",
+  "image": "inkblot_0x5B38Da6a.png",
   "attributes": [
     {
+      "trait_type": "ColorRelationship",
+      "value": "Harmony"
+    },
+    {
       "trait_type": "Address",
-      "value": "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4"
-    },
-    {
-      "trait_type": "Size",
-      "value": "1024x1024"
-    },
-    {
-      "trait_type": "ColorScheme",
-      "value": "The Blues"
-    },
-    {
-      "trait_type": "PrimaryColor",
-      "value": "#0000FF"
-    },
-    {
-      "trait_type": "SecondaryColor",
-      "value": "#000080"
-    },
-    {
-      "trait_type": "Complexity",
-      "value": "Medium"
-    },
-    {
-      "trait_type": "Pattern",
-      "value": "Standard"
+      "value": "0x5B38Da6a..."
     }
   ]
 }
 ```
 
+## Development
+
+### Project Structure
+
+- `src/`: Source code for inkblot generation
+  - `cli.js`: Command line interface
+  - `config.js`: Global parameters
+  - `generateRorschach.js`: Main generator module
+  - `utils/`: Utility functions
+    - `colors.js`: Hardcoded color mappings (for backwards compatibility)
+    - `colorTheory.js`: Color generation and relationships
+    - `ethUtils.js`: Ethereum address analysis
+    - `particleUtils.js`: Particle generation
+    - `renderUtils.js`: Image rendering
+
 ### Contracts
 
-Infinite Inkblot contracts are built with Foundry and can be found in the `contracts/` directory.
+Smart contracts are built with Foundry, and can be found in `contracts/`.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-### todo
-
-- [x] rename the color pairs
-- [ ] make some more patterns
-- [ ] tweak 420 pattern to look more leaf-like
-- [ ] switch current high-zero pattern to be for palindromes
-- [ ] create new high-zero pattern that uses lighter/smaller/less dense particles
+MIT

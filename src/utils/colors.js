@@ -1,3 +1,5 @@
+const colorTheory = require('./colorTheory');
+
 // Color palette definition
 const COLORS = {
   WHITE: {
@@ -209,20 +211,61 @@ function is420Address(address) {
  * @returns {Object} Selected color pair
  */
 function selectColorPair(ethFeatures) {
+  // For special cases, use the existing predefined pairs
   // 420 address gets the 420 Special pair
-  if (is420Address(ethFeatures.address)) {
+  if (ethFeatures.address.toLowerCase().includes('420')) {
     return COLOR_PAIRS[0];
   }
 
-  // less unique addresses get either monochrome or sepia colors based on repeating character
+  // Less unique addresses get either monochrome or sepia colors based on repeating character
   if (ethFeatures.isLessUnique) {
     return ethFeatures.hasNonZeroRepeat ? COLOR_PAIRS[2] : COLOR_PAIRS[1];
   }
 
-  // deterministically select color pair from seed
-  // exclude "420 Special", "Monochrome", and "Sepia" pairs with modulo (COLOR_PAIRS.length - 3)
-  const pairIndex = (ethFeatures.seed % (COLOR_PAIRS.length - 3)) + 3;
-  return COLOR_PAIRS[pairIndex];
+  // For other addresses, generate colors based on color theory
+  // Generate primary color from address
+  const primaryHsl = colorTheory.generatePrimaryColor(ethFeatures.address);
+
+  // Determine color relationship based on address features
+  const relationship = colorTheory.determineColorRelationship(ethFeatures);
+
+  // Generate secondary color based on relationship
+  const secondaryHsl = colorTheory.generateSecondaryColor(
+    primaryHsl,
+    relationship,
+    ethFeatures
+  );
+
+  // Convert to RGB
+  const primaryRgb = colorTheory.hslToRgb(
+    primaryHsl.hue,
+    primaryHsl.saturation,
+    primaryHsl.lightness
+  );
+  const secondaryRgb = colorTheory.hslToRgb(
+    secondaryHsl.hue,
+    secondaryHsl.saturation,
+    secondaryHsl.lightness
+  );
+
+  // Generate color names
+  const primaryName = colorTheory.generateColorName(primaryRgb, primaryHsl);
+  const secondaryName = colorTheory.generateColorName(
+    secondaryRgb,
+    secondaryHsl
+  );
+
+  return {
+    name: colorTheory.generateRelationshipName(relationship),
+    primary: {
+      name: primaryName,
+      rgb: primaryRgb,
+    },
+    secondary: {
+      name: secondaryName,
+      rgb: secondaryRgb,
+    },
+  };
 }
 
 /**
@@ -239,16 +282,16 @@ function generateColorScheme(pair, is420Special = false, isLessUnique = false) {
   if (is420Special) {
     // color pattern for 420 addresses
     return [
-      black, // 0.0-0.1 noise range - minimal usage, background/edges
-      primary, // 0.1-0.2 noise range - outlines and deep shadows
-      secondary, // 0.2-0.3 noise range - primary color, inner details
-      primary, // 0.3-0.4 noise range - primary color, major features
-      black, // 0.4-0.5 noise range - secondary color, transition areas
-      secondary, // 0.5-0.6 noise range - central shadows
-      primary, // 0.6-0.7 noise range - primary color, core details
-      black, // 0.7-0.8 noise range - primary color, highlights
-      secondary, // 0.8-0.9 noise range - secondary color, accents
-      white, // 0.9-1.0 noise range - minimal usage, highest noise values
+      white, // minimal usage, background/edges
+      primary, // outlines and deep shadows
+      secondary, // primary color, inner details
+      primary, // primary color, major features
+      black, // secondary color, transition areas
+      secondary, // central shadows
+      primary, // primary color, core details
+      black, // primary color, highlights
+      secondary, // secondary color, accents
+      white, // highest noise values
     ];
   } else if (isLessUnique) {
     // monochrome/sepia pattern for less unique addresses
@@ -312,4 +355,5 @@ module.exports = {
   COLOR_PAIRS,
   createColorString,
   getColorSchemeFromEthFeatures,
+  selectColorPair,
 };
