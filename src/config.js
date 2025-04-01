@@ -5,7 +5,7 @@ module.exports = {
     framesToRender: 220, // simulate frames
     speed: 0.005, // animation speed
     scale: 0.01, // noise scale
-    maxRadius: 10, // max particle radius
+    maxRadius: 8,
     fadeAlpha: 5, // lower = more particle accumulation
     outputPath: './output',
     horizontalMargin: 0.1,
@@ -13,17 +13,17 @@ module.exports = {
   },
 
   particleParams: {
-    // Basic constants
+    // basic constants
     SEED_MULTIPLIER: 1000000,
     MAX_ATTEMPTS: 10,
 
-    // Noise function parameters
+    // noise function parameters
     noise: {
       CACHE_PRECISION: 4,
       PERMUTATION_SIZE: 256,
     },
 
-    // Plotter parameters
+    // plotter parameters
     plotter: {
       COLOR_DISTRIBUTION_POWER: 1.5,
       RADIUS_CENTER: 0.5,
@@ -32,20 +32,20 @@ module.exports = {
       RADIUS_VARIATION_SCALE: 0.3,
     },
 
-    // Particle distribution parameters
+    // particle distribution parameters
     distribution: {
       HORIZONTAL_WEIGHT: 0.7,
       VERTICAL_WEIGHT: 0.3,
       DISTANCE_FALLOFF_POWER: 4,
     },
 
-    // Inverted pattern parameters
+    // inverted pattern parameters
     inverted: {
       LINEAR_FALLOFF_WEIGHT: 0.7,
       CIRCULAR_FALLOFF_WEIGHT: 0.3,
     },
 
-    // Star pattern parameters
+    // star pattern parameters
     star: {
       POINTS: 3.5,
       SUBPOINTS: 7,
@@ -58,9 +58,17 @@ module.exports = {
       ASYMMETRY_WEIGHT: 0.1,
     },
   },
+  // particle size and edge parameters
+  renderParams: {
+    MIN_PARTICLE_SIZE_RATIO: 0.1,
+    EDGE_FALLOFF_FACTOR: 0.8,
+    EDGE_NOISE_MULTIPLIER: 0.4,
+    DISTANCE_CENTER_WEIGHT: 0.5,
+    EDGE_NOISE_FREQUENCY: 8,
+  },
 
   colorTheory: {
-    // Color space limits
+    // color space limits
     space: {
       HUE_MAX: 360,
       SATURATION_MAX: 1,
@@ -68,7 +76,7 @@ module.exports = {
       RGB_MAX: 255,
     },
 
-    // Primary color generation ranges
+    // primary color generation ranges
     primary: {
       SATURATION_MIN: 0.7,
       SATURATION_RANGE: 0.2,
@@ -76,7 +84,7 @@ module.exports = {
       LIGHTNESS_RANGE: 0.3,
     },
 
-    // Secondary color adjustments
+    // secondary color adjustments
     secondary: {
       VARIATION_RANGE: 0.2,
       ANALOGOUS_HUE_OFFSET: 20,
@@ -95,7 +103,7 @@ module.exports = {
       },
     },
 
-    // Special case colors
+    // special case colors
     special: {
       420: {
         HUE: 120,
@@ -113,7 +121,7 @@ module.exports = {
       },
     },
 
-    // Color naming thresholds
+    // thresholds for color naming
     naming: {
       DEEP_LIGHTNESS: 0.1,
       PALE_LIGHTNESS: 0.9,
@@ -122,7 +130,7 @@ module.exports = {
       LIGHT_LIGHTNESS: 0.8,
     },
 
-    // Hue ranges for color naming
+    // hue ranges for color naming
     hueRanges: {
       RED: { min: 345, max: 15 },
       ORANGE: { min: 15, max: 45 },

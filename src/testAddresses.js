@@ -18,14 +18,14 @@ function generateRandomAddress() {
   return address;
 }
 
-// Generate 50 random addresses and their inkblots
+// Generate 20 random addresses and their inkblots
 async function generateTestSet() {
   const addresses = [];
   const results = [];
 
-  console.log('Generating 50 test addresses and inkblots...');
+  console.log('Generating 20 test addresses and inkblots...');
 
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 20; i++) {
     const address = generateRandomAddress();
     addresses.push(address);
 
@@ -46,7 +46,7 @@ async function generateTestSet() {
         path: outputPath,
       });
 
-      console.log(`Generated inkblot ${i + 1}/50 for address ${address}`);
+      console.log(`Generated inkblot ${i + 1}/20 for address ${address}`);
     } catch (error) {
       results.push({
         address,
@@ -54,7 +54,7 @@ async function generateTestSet() {
         error: error.message,
       });
       console.error(
-        `Failed to generate inkblot ${i + 1}/50 for address ${address}:`,
+        `Failed to generate inkblot ${i + 1}/20 for address ${address}:`,
         error.message
       );
     }
