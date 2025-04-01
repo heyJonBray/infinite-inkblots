@@ -9,9 +9,9 @@ Various aspects of an Ethereum address will result in different traits that alte
 - **Uniqueness**: Addresses with low repetition in their characters produce more variable particle sizes.
 - **Palindrome**: If the end of an address is a palindrome, the pattern repeats from the edges and center.
 - **420 Special**: Addresses that start or end with '420' produce a unique green color pairing and cannabis leaf shaped pattern.
-- **Zeroes**: The more consecutive zeroes an address has, the lower the particle density.
-
-### TODO: add more traits
+- **Repeating Characters**: A large number of repeating characters (like in vanity addresses) get different color schemes:
+  - **Zeroes**: monochrome
+  - **Letters**: sepia
 
 ## Installation
 
@@ -126,6 +126,10 @@ The generator automatically extracts traits for NFT metadata and saves them to `
   ]
 }
 ```
+
+### Contracts
+
+Infinite Inkblot contracts are built with Foundry and can be found in the `contracts/` directory.
 
 ## License
 
