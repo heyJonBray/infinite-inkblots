@@ -4,7 +4,9 @@ A generative art project that creates deterministic, particle-based Rorschach in
 
 ## Traits
 
-Various aspects of an Ethereum address will result in different traits that alter the particle generation.
+Various aspects of an Ethereum address will result in different traits that alter the particle generation and color selection.
+
+### Pattern Traits
 
 - **Uniqueness**: Addresses with low repetition in their characters produce more variable particle sizes.
 - **Palindrome**: If the end of an address is a palindrome, the pattern repeats from the edges and center.
@@ -12,6 +14,79 @@ Various aspects of an Ethereum address will result in different traits that alte
 - **Repeating Characters**: A large number of repeating characters (like in vanity addresses) get different color schemes:
   - **Zeroes**: monochrome
   - **Letters**: sepia
+
+### Color Traits
+
+The color selection is determined by analyzing various aspects of the Ethereum address:
+
+1. **Special Cases**:
+
+   - Addresses containing '420' get a special green color pair (Emerald & Jade)
+   - Addresses with repeating zeros get a monochrome scheme (Black & Grey)
+   - Addresses with repeating non-zero characters get a sepia scheme (Dark & Light Sepia)
+
+2. **Color Theory Relationships**:
+
+   - **Palindrome Addresses**: Generate complementary colors (opposites on the color wheel)
+   - **High Diversity** (>70% unique characters): Use split complementary colors
+   - **Low Diversity** (<30% unique characters): Use analogous accent colors
+   - **Standard Addresses**: Randomly select from:
+     - Complementary (Contrast)
+     - Analogous (Harmony)
+     - Split Complementary (Balance)
+     - Analogous Accent
+
+3. **Color Generation**:
+   - Primary color is generated from the first 7 characters of the address:
+     - First 3 chars determine the hue (0-360°)
+     - Next 2 chars set saturation (40-100%)
+     - Next 2 chars set lightness (35-75%)
+   - Secondary color is determined by the color relationship type and includes subtle variations based on address segments
+
+## Color Theory Approach
+
+The project uses a sophisticated color theory system to ensure aesthetically pleasing and meaningful color combinations:
+
+### Color Space
+
+- Uses HSL (Hue, Saturation, Lightness) color space for intuitive color manipulation
+- Maintains consistent color ranges for optimal visibility and aesthetics
+- Ensures colors are web-safe and print-friendly
+
+### Color Relationships
+
+1. **Complementary Colors**
+
+   - Opposite colors on the color wheel
+   - Creates maximum contrast and visual interest
+   - Used for palindrome addresses to emphasize symmetry
+
+2. **Analogous Colors**
+
+   - Adjacent colors on the color wheel
+   - Creates harmonious, cohesive combinations
+   - Used for addresses with low character diversity
+
+3. **Split Complementary**
+
+   - A variation of complementary colors
+   - Uses one of the two colors adjacent to the complement
+   - Creates high contrast while being less intense
+   - Used for addresses with high character diversity
+
+4. **Analogous Accent**
+   - Adjacent colors with increased contrast
+   - Creates subtle harmony with added visual interest
+   - Used for addresses with low character diversity
+
+### Color Naming
+
+Colors are given descriptive names based on their HSL values:
+
+- Base hue names (Red, Orange, Yellow, etc.)
+- Lightness modifiers (Dark, Light)
+- Saturation modifiers (Muted, Vibrant)
+- Special cases (Deep, Pale, Gray percentages)
 
 ## Installation
 

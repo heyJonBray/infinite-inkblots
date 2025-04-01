@@ -1,31 +1,31 @@
 {
-  "name": "Infinite Inkblot 0x1db3439a",
+  "name": "Infinite Inkblot 0xabcdef01",
   "description": "A unique Rorschach-style inkblot generated from an Ethereum address",
-  "image": "particle_ror_0x1db3439a222c519ab44bb1144fc28167b4fa6ee6.png",
+  "image": "inkblot_0xabcdef01.png",
   "attributes": [
     {
       "trait_type": "Address",
-      "value": "0x1db3439a222c519ab44bb1144fc28167b4fa6ee6"
+      "value": "0xabcdef0123456789abcdef0123456789abcdef01"
     },
     {
       "trait_type": "Size",
       "value": "1024x1024"
     },
     {
-      "trait_type": "ColorScheme",
-      "value": "Teal & Gold"
+      "trait_type": "ColorRelationship",
+      "value": "Balance"
     },
     {
       "trait_type": "PrimaryColor",
-      "value": "Teal"
+      "value": "Vibrant Blue"
     },
     {
       "trait_type": "SecondaryColor",
-      "value": "Golden Olive"
+      "value": "Vibrant Orange"
     },
     {
       "trait_type": "Type",
-      "value": "Palindrome"
+      "value": "Standard"
     },
     {
       "trait_type": "Pattern",

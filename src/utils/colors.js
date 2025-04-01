@@ -1,3 +1,5 @@
+const colorTheory = require('./colorTheory');
+
 // Color palette definition
 const COLORS = {
   WHITE: {
@@ -209,20 +211,61 @@ function is420Address(address) {
  * @returns {Object} Selected color pair
  */
 function selectColorPair(ethFeatures) {
+  // For special cases, use the existing predefined pairs
   // 420 address gets the 420 Special pair
-  if (is420Address(ethFeatures.address)) {
+  if (ethFeatures.address.toLowerCase().includes('420')) {
     return COLOR_PAIRS[0];
   }
 
-  // less unique addresses get either monochrome or sepia colors based on repeating character
+  // Less unique addresses get either monochrome or sepia colors based on repeating character
   if (ethFeatures.isLessUnique) {
     return ethFeatures.hasNonZeroRepeat ? COLOR_PAIRS[2] : COLOR_PAIRS[1];
   }
 
-  // deterministically select color pair from seed
-  // exclude "420 Special", "Monochrome", and "Sepia" pairs with modulo (COLOR_PAIRS.length - 3)
-  const pairIndex = (ethFeatures.seed % (COLOR_PAIRS.length - 3)) + 3;
-  return COLOR_PAIRS[pairIndex];
+  // For other addresses, generate colors based on color theory
+  // Generate primary color from address
+  const primaryHsl = colorTheory.generatePrimaryColor(ethFeatures.address);
+
+  // Determine color relationship based on address features
+  const relationship = colorTheory.determineColorRelationship(ethFeatures);
+
+  // Generate secondary color based on relationship
+  const secondaryHsl = colorTheory.generateSecondaryColor(
+    primaryHsl,
+    relationship,
+    ethFeatures
+  );
+
+  // Convert to RGB
+  const primaryRgb = colorTheory.hslToRgb(
+    primaryHsl.hue,
+    primaryHsl.saturation,
+    primaryHsl.lightness
+  );
+  const secondaryRgb = colorTheory.hslToRgb(
+    secondaryHsl.hue,
+    secondaryHsl.saturation,
+    secondaryHsl.lightness
+  );
+
+  // Generate color names
+  const primaryName = colorTheory.generateColorName(primaryRgb, primaryHsl);
+  const secondaryName = colorTheory.generateColorName(
+    secondaryRgb,
+    secondaryHsl
+  );
+
+  return {
+    name: colorTheory.generateRelationshipName(relationship),
+    primary: {
+      name: primaryName,
+      rgb: primaryRgb,
+    },
+    secondary: {
+      name: secondaryName,
+      rgb: secondaryRgb,
+    },
+  };
 }
 
 /**
@@ -312,4 +355,5 @@ module.exports = {
   COLOR_PAIRS,
   createColorString,
   getColorSchemeFromEthFeatures,
+  selectColorPair,
 };
