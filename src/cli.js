@@ -15,6 +15,57 @@ const SAMPLE_ADDRESSES = [
 ];
 
 /**
+ * Ensure directories exist
+ * @param {string[]} dirs - Array of directory paths to create
+ */
+function ensureDirs(dirs) {
+  dirs.forEach((dir) => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  });
+}
+
+/**
+ * Generate output filename for an inkblot
+ * @param {string} address - Ethereum address
+ * @param {boolean} isTest - Whether this is a test generation
+ * @returns {string} Generated filename
+ */
+function generateOutputFilename(address, isTest = false) {
+  if (isTest) return 'test.png';
+  if (address) return `inkblot_${address.slice(0, 10)}.png`;
+  return `inkblot_${Date.now()}.png`;
+}
+
+/**
+ * Save metadata for an inkblot
+ * @param {string} address - Ethereum address
+ * @param {string} outputFilename - Name of the generated image file
+ * @param {number} size - Size of the generated image
+ * @param {string} metadataDir - Directory to save metadata
+ */
+function saveMetadata(address, outputFilename, size, metadataDir) {
+  const ethFeatures = extractEthFeatures(address);
+  const colorScheme = getColorSchemeFromEthFeatures(ethFeatures);
+
+  // log generation details
+  logGenerationDetails(address, ethFeatures, colorScheme);
+
+  const metadataPath = `${metadataDir}/metadata_${address.slice(0, 8)}.json`;
+  const metadata = generateMetadata(
+    address,
+    outputFilename,
+    size,
+    ethFeatures,
+    colorScheme
+  );
+
+  fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
+  console.log(`Metadata saved to ${metadataPath}`);
+}
+
+/**
  * Log generation details for an inkblot
  * @param {string} address - The Ethereum address
  * @param {Object} ethFeatures - Features extracted from the address
@@ -142,13 +193,7 @@ async function generateExamples() {
   const OUTPUT_DIR = 'output/examples';
   const METADATA_DIR = 'output/examples/metadata';
 
-  if (!fs.existsSync(OUTPUT_DIR)) {
-    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
-  }
-
-  if (!fs.existsSync(METADATA_DIR)) {
-    fs.mkdirSync(METADATA_DIR, { recursive: true });
-  }
+  ensureDirs([OUTPUT_DIR, METADATA_DIR]);
 
   console.log(
     `Generating inkblots for ${SAMPLE_ADDRESSES.length} addresses...`
@@ -160,7 +205,8 @@ async function generateExamples() {
       `\nGenerating for address ${i + 1}/${SAMPLE_ADDRESSES.length}: ${address}`
     );
 
-    const outputPath = `${OUTPUT_DIR}/particle_ror_${address}.png`;
+    const outputFilename = generateOutputFilename(address);
+    const outputPath = `${OUTPUT_DIR}/${outputFilename}`;
 
     // generate inkblot
     const imageBuffer = generateParticleRorschach(address, {
@@ -169,27 +215,7 @@ async function generateExamples() {
     });
 
     fs.writeFileSync(outputPath, imageBuffer);
-
-    const ethFeatures = extractEthFeatures(address);
-    const colorScheme = getColorSchemeFromEthFeatures(ethFeatures);
-
-    // log generation details
-    logGenerationDetails(address, ethFeatures, colorScheme);
-
-    const metadataPath = `${METADATA_DIR}/metadata_${address.substring(
-      0,
-      8
-    )}.json`;
-    const metadata = generateMetadata(
-      address,
-      outputPath.split('/').pop(),
-      1024,
-      ethFeatures,
-      colorScheme
-    );
-
-    fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
-    console.log(`Metadata saved to: ${metadataPath}`);
+    saveMetadata(address, outputFilename, 1024, METADATA_DIR);
   }
 
   console.log('\nAll inkblots generated successfully!');
@@ -214,18 +240,9 @@ async function main() {
   const outputDir = args.outputPath || './output';
   const metadataDir = `${outputDir}/metadata`;
 
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
-  if (!fs.existsSync(metadataDir)) {
-    fs.mkdirSync(metadataDir, { recursive: true });
-  }
+  ensureDirs([outputDir, metadataDir]);
 
-  const outputFilename = args.isTest
-    ? 'test.png'
-    : args.ethAddress
-    ? `particle_ror_${args.ethAddress.slice(0, 10)}.png`
-    : `particle_ror_${Date.now()}.png`;
+  const outputFilename = generateOutputFilename(args.ethAddress, args.isTest);
   const outputPath = `${outputDir}/${outputFilename}`;
 
   console.log(`Generating particle-based Rorschach inkblot...`);
@@ -240,30 +257,10 @@ async function main() {
   });
 
   fs.writeFileSync(outputPath, imageBuffer);
-
   console.log(`Inkblot generated successfully!`);
 
   if (args.ethAddress) {
-    const ethFeatures = extractEthFeatures(args.ethAddress);
-    const colorScheme = getColorSchemeFromEthFeatures(ethFeatures);
-
-    // log generation details
-    logGenerationDetails(args.ethAddress, ethFeatures, colorScheme);
-
-    const metadataPath = `${metadataDir}/metadata_${args.ethAddress.slice(
-      0,
-      8
-    )}.json`;
-    const metadata = generateMetadata(
-      args.ethAddress,
-      outputFilename,
-      args.size,
-      ethFeatures,
-      colorScheme
-    );
-
-    fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
-    console.log(`Metadata saved to ${metadataPath}`);
+    saveMetadata(args.ethAddress, outputFilename, args.size, metadataDir);
   }
 }
 
